@@ -1,55 +1,82 @@
-const axios = require("axios");
-const fs = require("fs-extra");
-const path = require("path");
+const models = [
+  'DreamShaper',
+  'MBBXL_Ultimate',
+  'Mysterious',
+  'Copax_TimeLessXL',
+  'Pixel_Art_XL',
+  'ProtoVision_XL',
+  'SDXL_Niji',
+  'CounterfeitXL',
+  'DucHaiten_AIart_SDXL'
+];
 
 module.exports = {
   config: {
     name: "gen",
     version: "1.0",
-    author: "RI F AT | NeoKEX",
+    author: "RedWan×MAHI×Sanam",
     countDown: 5,
     role: 0,
-    shortDescription: "Generate image from prompt",
-    longDescription: "Generate a new image based on your prompt.",
-    category: "AI-IMAGE",
-    guide: "{p}gen [prompt]"
+    longDescription: {
+      vi: "",
+      en: "Get images from text.",
+    },
+    category: "Image~Create",
+    guide: {
+      vi: "",
+      en: "Type {pn} with your prompts | (model name)\nHere are the Supported models:\n" + models.map((item, index) => `${index + 1}. ${item}`).join('\n'),
+    },
   },
 
-  onStart: async function ({ args, message, api, event }) {
-    const prompt = args.join(" ");
-    if (!prompt) return message.reply("Please provide a prompt to generate an image.");
-    
-    // Do not change the credits
-    api.setMessageReaction("🛠️", event.messageID, (err) => {}, true);
-
-    const imgPath = path.join(__dirname, "cache", `${Date.now()}_gen.jpg`);
-
+  onStart: async function ({ api, args, message, event }) {
     try {
-      const imageUrl = `https://edit-and-gen.onrender.com/gen?prompt=${encodeURIComponent(prompt)}`;
-      const res = await axios.get(imageUrl, { responseType: "arraybuffer" });
-
-      await fs.ensureDir(path.dirname(imgPath));
-      await fs.writeFile(imgPath, Buffer.from(res.data, "binary"));
-
-      message.reply({
-        body: `✅ Image generated for: "${prompt}"`,
-        attachment: fs.createReadStream(imgPath)
-      });
-      
-      // Otherwise I'll fvckyourmom
-      api.setMessageReaction("✅", event.messageID, (err) => {}, true);
-
-    } catch (err) {
-      console.error("GEN Error:", err);
-      message.reply("Failed to generate image. Please try again later.");
-      
-      // Subscribe my channel: NeoKEX ✅
-      api.setMessageReaction("❌", event.messageID, (err) => {}, true);
-
-    } finally {
-      if (fs.existsSync(imgPath)) {
-        await fs.remove(imgPath);
+      const text = args.join(" ");
+      if (!text) {
+        return message.reply("Please provide a prompt.");
       }
+
+      let prompt, model;
+      if (text.includes("|")) {
+        const [promptText, modelText] = text.split("|").map((str) => str.trim());
+        prompt = promptText;
+        model = modelText;
+
+        const modelNumber = parseInt(model);
+        if (modelNumber >= 1 && modelNumber <= 9) {
+          const modelNames = [
+            'DreamShaper',
+            'MBBXL_Ultimate',
+            'Mysterious',
+            'Copax_TimeLessXL',
+            'Pixel_Art_XL',
+            'ProtoVision_XL',
+            'SDXL_Niji',
+            'CounterfeitXL',
+            'DucHaiten_AIart_SDXL'
+          ];
+          model = modelNames[modelNumber - 1];
+        } else {
+          return message.reply("Invalid model number. Supported models are:\n" + models.map((item, index) => `${index + 1}. ${item}`).join('\n'));
+        }
+      } else {
+        prompt = text;
+        model = "DreamShaper";
+      }
+
+      let id;
+      api.setMessageReaction("⏳", event.messageID, () => {}, true);
+      const waitingMessage = await message.reply("✅ | Creating your Imagination...");
+
+      const API = `https://www.api.vyturex.com/curios?prompt=${encodeURIComponent(prompt)}&modelType=${model}`;
+      const imageStream = await global.utils.getStreamFromURL(API);
+
+      await message.reply({
+        attachment: imageStream,
+      });
+      api.setMessageReaction("✅", event.messageID, () => {}, true);
+      await api.unsendMessage(waitingMessage.messageID);
+    } catch (error) {
+      message.reply("Your prompt is blocked. Try again later with another prompt. [ Tor Mayre Chudi REDWAN/ MAHI  Othoba Sanam Er Permission Nicos? ]");
     }
-  }
+  },
 };

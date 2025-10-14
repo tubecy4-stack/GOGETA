@@ -1,89 +1,145 @@
- module.exports.config = {
-	name: "help",
-	version: "1.0.2",
-	hasPermssion: 0,
-	credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-	description: "Beginner's Guide",
-	commandCategory: "system",
-	usages: "[Tên module]",
-	cooldowns: 1,
-	envConfig: {
-		autoUnsend: true,
-		delayUnsend: 300
-	}
-};
+const fs = require("fs-extra");
+const axios = require("axios");
+const path = require("path");
+const { getPrefix } = global.utils;
+const { commands, aliases } = global.GoatBot;
 
-module.exports.languages = {
-	//"vi": {
-	//	"moduleInfo": "「 %1 」\n%2\n\n❯ Cách sử dụng: %3\n❯ Thuộc nhóm: %4\n❯ Thời gian chờ: %5 giây(s)\n❯ Quyền hạn: %6\n\n» Module code by %7 «",
-	//	"helpList": '[ Hiện tại đang có %1 lệnh có thể sử dụng trên bot này, Sử dụng: "%2help nameCommand" để xem chi tiết cách sử dụng! ]"',
-	//	"user": "Người dùng",
-  //      "adminGroup": "Quản trị viên nhóm",
-  //      "adminBot": "Quản trị viên bot"
-//	},
-	"en": {
-		"moduleInfo": "「 %1 」\n%2\n\n❯ Usage: %3\n❯ Category: %4\n❯ Waiting time: %5 seconds(s)\n❯ Permission: %6\n\n» Module code by %7 «",
-		"helpList": '[ There are %1 commands on this bot, Use: "%2help nameCommand" to know how to use! ]',
-		"user": "User",
-        "adminGroup": "Admin group",
-        "adminBot": "Admin bot"
-	}
-};
+module.exports = {
+  config: {
+    name: "help",
+    version: "1.18",
+    author: "ShAn", 
+    countDown: 5,
+    role: 0,
+    shortDescription: {
+      en: "View command usage",
+    },
+    longDescription: {
+      en: "View command usage and list all commands or commands by category",
+    },
+    category: "info",
+    guide: {
+      en: "{pn} / help cmdName\n{pn} -c <categoryName>",
+    },
+    priority: 1,
+  },
 
-module.exports.handleEvent = function ({ api, event, getText }) {
-	const { commands } = global.client;
-	const { threadID, messageID, body } = event;
+  onStart: async function ({ message, args, event, threadsData, role }) {
+    const { threadID } = event;
+    const threadData = await threadsData.get(threadID);
+    const prefix = getPrefix(threadID);
 
-	if (!body || typeof body == "undefined" || body.indexOf("help") != 0) return;
-	const splitBody = body.slice(body.indexOf("help")).trim().split(/\s+/);
-	if (splitBody.length == 1 || !commands.has(splitBody[1].toLowerCase())) return;
-	const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
-	const command = commands.get(splitBody[1].toLowerCase());
-	const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
-	return api.sendMessage(getText("moduleInfo", command.config.name, command.config.description, `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`, command.config.commandCategory, command.config.cooldowns, ((command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot")), command.config.credits), threadID, messageID);
-}
+    if (args.length === 0) {
+      const categories = {};
+      let msg = "";
 
-module.exports. run = function({ api, event, args, getText }) {
-	const { commands } = global.client;
-	const { threadID, messageID } = event;
-	const command = commands.get((args[0] || "").toLowerCase());
-	const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
-	const { autoUnsend, delayUnsend } = global.configModule[this.config.name];
-	const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
+      msg += `╔══════════════╗\n🔹 COMMAND LIST 🔹\n╚══════════════╝\n`;
 
-	if (!command) {
-		const arrayInfo = [];
-		const page = parseInt(args[0]) || 1;
-    const numberOfOnePage = 10;
-    //*số thứ tự 1 2 3.....cú pháp ${++i}*//
-    let i = 0;
-    let msg = "";
-    
-    for (var [name, value] of (commands)) {
-      name += ``;
-      arrayInfo.push(name);
+      for (const [name, value] of commands) {
+        if (value.config.role > 1 && role < value.config.role) continue;
+
+        const category = value.config.category || "Uncategorized";
+        categories[category] = categories[category] || { commands: [] };
+        categories[category].commands.push(name);
+      }
+
+      Object.keys(categories).forEach((category) => {
+        if (category !== "info") {
+          msg += `\n╭────────────⭓\n│『 ${category.toUpperCase()} 』`;
+
+          const names = categories[category].commands.sort();
+          names.forEach((item) => {
+            msg += `\n│💠${item}💠`;
+          });
+
+          msg += `\n╰────────⭓`;
+        }
+      });
+
+      const totalCommands = commands.size;
+      msg += `\n𝗖𝘂𝗿𝗿𝗲𝗻𝘁𝗹𝘆, 𝘁𝗵𝗲 𝗯𝗼𝘁 𝗵𝗮𝘀 ${totalCommands} 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀 𝘁𝗵𝗮𝘁 𝗰𝗮𝗻 𝗯𝗲 𝘂𝘀𝗲𝗱\n`;
+      msg += `\n𝗧𝘆𝗽𝗲 ${prefix}𝗵𝗲𝗹𝗽 𝗰𝗺𝗱𝗡𝗮𝗺𝗲 𝘁𝗼 𝘃𝗶𝗲𝘄 𝘁𝗵𝗲 𝗱𝗲𝘁𝗮𝗶𝗹𝘀 𝗼𝗳 𝘁𝗵𝗮𝘁 𝗰𝗼𝗺𝗺𝗮𝗻𝗱\n`;
+      msg += `\n🫧𝘽𝙊𝙏 𝙉𝘼𝙈𝙀🫧: ♡𝕮𝖍𝖔𝖈𝖔𝖑𝖆𝖙𝖊 𝕼𝖚𝖊𝖊𝖓♡`;
+      msg += `\n🔹 𝘽𝙊𝙏 𝙊𝙒𝙉𝙀𝙍 🔹`;
+      msg += `\n 	 					`;
+      msg += `\n~𝙉𝘼𝙈𝙀:✰ '𝗘𝘄'𝗿 𝗦𝗵𝗔𝗻'𝘀 ✰`;
+      msg += `\n~𝙁𝘽: m.me/Sh4n.Dev1`;
+
+      await message.reply({
+        body: msg,
+      });
+    } else if (args[0] === "-c") {
+      if (!args[1]) {
+        await message.reply("Please specify a category name.");
+        return;
+      }
+
+      const categoryName = args[1].toLowerCase();
+      const filteredCommands = Array.from(commands.values()).filter(
+        (cmd) => cmd.config.category?.toLowerCase() === categoryName
+      );
+
+      if (filteredCommands.length === 0) {
+        await message.reply(`No commands found in the category "${categoryName}".`);
+        return;
+      }
+
+      let msg = `╔══════════════╗\n🔹 ${categoryName.toUpperCase()} COMMANDS 🔹\n╚══════════════╝\n`;
+
+      filteredCommands.forEach((cmd) => {
+        msg += `\n💠 ${cmd.config.name} 💠`;
+      });
+
+      await message.reply(msg);
+    } else {
+      const commandName = args[0].toLowerCase();
+      const command = commands.get(commandName) || commands.get(aliases.get(commandName));
+
+      if (!command) {
+        await message.reply(`Command "${commandName}" not found.`);
+      } else {
+        const configCommand = command.config;
+        const roleText = roleTextToString(configCommand.role);
+        const author = configCommand.author || "Unknown";
+
+        const longDescription = configCommand.longDescription
+          ? configCommand.longDescription.en || "No description"
+          : "No description";
+
+        const guideBody = configCommand.guide?.en || "No guide available.";
+        const usage = guideBody.replace(/{p}/g, prefix).replace(/{n}/g, configCommand.name);
+
+        const response = `╭── NAME ────⭓\n` +
+          `│ ${configCommand.name}\n` +
+          `├── INFO\n` +
+          `│ Description: ${longDescription}\n` +
+          `│ Other names: ${configCommand.aliases ? configCommand.aliases.join(", ") : "Do not have"}\n` +
+          `│ Version: ${configCommand.version || "1.0"}\n` +
+          `│ Role: ${roleText}\n` +
+          `│ Time per command: ${configCommand.countDown || 1}s\n` +
+          `│ Author: ${author}\n` +
+          `├── Usage\n` +
+          `│ ${usage}\n` +
+          `├── Notes\n` +
+          `│ The content inside <ShAn> can be changed\n` +
+          `│ The content inside [a|b|c] is a or b or c\n` +
+          `╰━━━━━━━❖`;
+
+        await message.reply(response);
+      }
     }
-
-    arrayInfo.sort((a, b) => a.data - b.data);
-    
-    const startSlice = numberOfOnePage*page - numberOfOnePage;
-    i = startSlice;
-    const returnArray = arrayInfo.slice(startSlice, startSlice + numberOfOnePage);
-    
-    for (let item of returnArray) msg += `「 ${++i} 」${prefix}${item}\n`;
-    
-    
-    const siu = `Command list 📄\nMade by Prîyánsh Rajput 🥀\nFor More Information type /help (command name) ✨\n󰂆 󰟯 󰟰 󰟷 󰟺 󰟵 󰟫`;
-    
- const text = `\nPage (${page}/${Math.ceil(arrayInfo.length/numberOfOnePage)})\n`;
- 
-    return api.sendMessage(siu + "\n\n" + msg  + text, threadID, async (error, info) => {
-			if (autoUnsend) {
-				await new Promise(resolve => setTimeout(resolve, delayUnsend * 1000));
-				return api.unsendMessage(info.messageID);
-			} else return;
-		}, event.messageID);
-	}
-
-	return api.sendMessage(getText("moduleInfo", command.config.name, command.config.description, `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`, command.config.commandCategory, command.config.cooldowns, ((command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot")), command.config.credits), threadID, messageID);
+  },
 };
+
+function roleTextToString(roleText) {
+  switch (roleText) {
+    case 0:
+      return "0 (All users)";
+    case 1:
+      return "1 (Group administrators)";
+    case 2:
+      return "2 (Admin bot)";
+    default:
+      return "Unknown role";
+  }
+    }

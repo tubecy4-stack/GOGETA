@@ -1,1 +1,54 @@
-function _0x25ed(_0x382b7e,_0x103acb){const _0x16a8ef=_0x16a8();return _0x25ed=function(_0x25ed3d,_0x3b7bc7){_0x25ed3d=_0x25ed3d-0x81;let _0x140a57=_0x16a8ef[_0x25ed3d];return _0x140a57;},_0x25ed(_0x382b7e,_0x103acb);}const _0x52491b=_0x25ed;function _0x16a8(){const _0x1438ab=['425016xwJedd','4oDzlWI','writeFileSync','1796496xcAhie','lyrics','An\x20error\x20occurred\x20while\x20fetching\x20lyrics.','arraybuffer','exports','2.0.0','media','2920716owXFuZ','threadID','Priyansh\x20Rajput','data','Fetch\x20lyrics\x20of\x20a\x20song','12628ttAflu','get','image','axios','config','from','102binFCE','run','1146414ySsJiS','title','https://ai.new911.repl.co/api/tools/lyrics?song=','sendMessage','6048609hCKRPk','/cache/lyrics.png','fs-extra','artist','error','\x0a\x0a❏\x20Contact:\x20https://priyansh.infopriyansh.repl.co/','1926545pCTpln'];_0x16a8=function(){return _0x1438ab;};return _0x16a8();}(function(_0x52838c,_0x4d9ba9){const _0x2e83b3=_0x25ed,_0xc13b59=_0x52838c();while(!![]){try{const _0x31ccdc=-parseInt(_0x2e83b3(0x8e))/0x1*(-parseInt(_0x2e83b3(0x94))/0x2)+-parseInt(_0x2e83b3(0x82))/0x3+parseInt(_0x2e83b3(0xa2))/0x4*(-parseInt(_0x2e83b3(0xa0))/0x5)+-parseInt(_0x2e83b3(0x96))/0x6+parseInt(_0x2e83b3(0x9a))/0x7+-parseInt(_0x2e83b3(0xa1))/0x8+parseInt(_0x2e83b3(0x89))/0x9;if(_0x31ccdc===_0x4d9ba9)break;else _0xc13b59['push'](_0xc13b59['shift']());}catch(_0x2a1d5e){_0xc13b59['push'](_0xc13b59['shift']());}}}(_0x16a8,0x9388e));const axios=require(_0x52491b(0x91)),fs=require(_0x52491b(0x9c));module[_0x52491b(0x86)][_0x52491b(0x92)]={'name':_0x52491b(0x83),'version':_0x52491b(0x87),'hasPermssion':0x0,'credits':_0x52491b(0x8b),'description':_0x52491b(0x8d),'commandCategory':_0x52491b(0x88),'usages':'lyrics\x20[song\x20name]','cooldowns':0x5},module['exports'][_0x52491b(0x95)]=async function({api:_0x21a09e,event:_0x1e1790,args:_0x3f6c2c}){const _0x34e181=_0x52491b;try{const _0x2ab3b5=_0x3f6c2c['join']('\x20'),_0x353116=await axios[_0x34e181(0x8f)](_0x34e181(0x98)+encodeURIComponent(_0x2ab3b5)),_0x21ad7e=_0x353116['data'],_0x4ba15c=await axios[_0x34e181(0x8f)](_0x21ad7e[_0x34e181(0x90)],{'responseType':_0x34e181(0x85)});fs[_0x34e181(0x81)](__dirname+_0x34e181(0x9b),Buffer[_0x34e181(0x93)](_0x4ba15c[_0x34e181(0x8c)]));const _0x49b1de='❏\x20Credit:\x20Priyansh\x0a\x0a❏\x20Title:\x20'+_0x21ad7e[_0x34e181(0x97)]+'\x0a❏\x20Artist:\x20'+_0x21ad7e[_0x34e181(0x9d)]+'\x0a\x0a❏\x20Lyrics:\x0a'+_0x21ad7e['lyrics']+_0x34e181(0x9f);return _0x21a09e[_0x34e181(0x99)]({'body':_0x49b1de,'attachment':fs['createReadStream'](__dirname+_0x34e181(0x9b))},_0x1e1790[_0x34e181(0x8a)]);}catch(_0x20baaa){return console[_0x34e181(0x9e)](_0x20baaa),_0x21a09e[_0x34e181(0x99)](_0x34e181(0x84),_0x1e1790[_0x34e181(0x8a)]);}};
+const axios = require("axios");
+
+const baseApiUrl = async () => {
+  const base = await axios.get(
+    `https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`,
+  );
+  return base.data.api;
+};
+
+(module.exports = {
+  config: {
+    name: "lyrics",
+    aliases:["lr"],
+    version: "1.0",
+    author: "Nazrul",
+    countDown: 5,
+    role: 0,
+    description: {
+      en: "Get song lyrics with their Images"
+    },
+    category: "Song Lyrics",
+    guide: {
+      en: "{pn} <song name>"
+    }
+  },
+
+  onStart: async ({ api, event, args }) => {
+    try {
+      const Songs = args.join(' ');
+      if (!Songs) {
+        return api.sendMessage("Please provide a song name!", event.threadID, event.messageID);
+      }
+
+      const res = await axios.get(`${await baseApiUrl()}/lyrics2?songName=${encodeURIComponent(Songs)}`);
+      const data = res.data;
+      if (!data.title || !data.artist || !data.lyrics) {
+        return api.sendMessage("An error occurred while fetching lyrics!", event.threadID, event.messageID);
+      }
+
+      const songMessage = { 
+        body: `❏♡𝐒𝐨𝐧𝐠 𝐓𝐢𝐭𝐥𝐞: ${data.title}\n\n❏♡𝐀𝐫𝐭𝐢𝐬𝐭: ${data.artist}\n\n❏♡𝐒𝐨𝐧𝐠 𝐋𝐲𝐫𝐢𝐜𝐬:\n\n${data.lyrics}` 
+      };
+      
+      if (data.image) {
+        const stream = await axios.get(data.image, { responseType: 'stream' });
+        songMessage.attachment = stream.data;
+      }
+
+      return api.sendMessage(songMessage, event.threadID, event.messageID);
+    } catch (error) {
+    api.sendMessage("error: " + error.message, event.threadID, event.messageID);
+    }
+  }
+});
