@@ -1,19 +1,90 @@
-module.exports = {
-	config: {
-		name: "beauty",
-		version: "1.0",
-		author: "Samir",
-		role: 0,
-		category: "fun",
-		guide: {
-			vi: "Just For Fun",
-			en: "Calculate Your Beautiness"
-		} 
-	},
+const Jimp = require("jimp");
+const fs = require("fs-extra");
+const path = require("path");
 
-	onStart: async function ({ api, event }) {
-      const data = ["You are 1% beautiful🫠", "You are 2% beautiful🫠", "You are 3% beautiful🫠", "You are 4% beautiful🫠", "You are 5% beautiful🫠", "You are 6% beautiful🫠", "You are 7% beautiful🫠", "You are 8% beautiful🫠", "You are 9% beautiful🫠", "You are 10% beautiful🫠", "You are 11% beautiful🫠", "You are 12% beautiful🫠", "You are 13% beautiful🫠", "You are 14% beautiful🫠", "You are 15% beautiful🫠", "You are 16% beautiful🫠", "You are 17% beautiful🫠", "You are 18% beautiful🫠", "You are 19% beautiful🫠", "You are 20% beautiful🫠", "You are 21% beautiful🫠", "You are 22% beautiful🫠", "You are 23% beautiful🫠", "You are 24% beautiful🫠", "You are 25% beautiful🫠", "You are 26% beautiful🫠", "You are 27% beautiful🫠", "You are 28% beautiful🫠", "You are 29% beautiful🫠", "You are 30% beautiful🫠", "You are 31% beautiful🫠", "You are 32% beautiful🫠", "You are 33% beautiful🫠", "You are 34% beautiful🫠", "You are 35% beautiful🫠", "You are 36% beautiful🫠", "You are 37% beautiful🫠", "You are 38% beautiful🫠", "You are 39% beautiful🫠", "You are 40% beautiful🫠", "You are 41% beautiful🫠", "You are 42% beautiful🫠", "You are 43% beautiful🫠", "You are 44% beautiful🫠", "You are 45% beautiful🫠", "You are 46% beautiful🫠", "You are 47% beautiful🫠", "You are 48% beautiful🫠", "You are 49% beautiful🫠", "You are 50% beautiful🫠", "You are 51% beautiful🫠", "You are 52% beautiful🫠", "You are 53% beautiful🫠", "You are 54% beautiful🫠", "You are 55% beautiful🫠", "You are 56% beautiful🫠", "You are 57% beautiful🫠", "You are 58% beautiful🫠", "You are 59% beautiful🫠", "You are 60% beautiful🫠", "You are 61% beautiful🫠", "You are 62% beautiful🫠", "You are 63% beautiful🫠", "You are 64% beautiful🫠", "You are 65% beautiful🫠", "You are 66% beautiful🫠", "You are 67% beautiful🫠", "You are 68% beautiful🫠", "You are 69% beautiful🫠", "You are 70% beautiful🫠", "You are 71% beautiful🫠", "You are 72% beautiful🫠", "You are 73% beautiful🫠", "You are 74% beautiful🫠", "You are 75% beautiful🫠", "You are 76% beautiful🫠", "You are 77% beautiful🫠", "You are 78% beautiful🫠", "You are 79% beautiful🫠", "You are 80% beautiful🫠", "You are 81% beautiful🫠", "You are 82% beautiful🫠", "You are 83% beautiful🫠", "You are 84% beautiful🫠", "You are 85% beautiful🫠", "You are 86% beautiful🫠", "You are 87% beautiful🫠", "You are 88% beautiful🫠", "You are 89% beautiful🫠", "You are 90% beautiful🫠", "You are 91% beautiful🫠", "You are 92% beautiful🫠", "You are 93% beautiful🫠", "You are 94% beautiful🫠", "You are 95% beautiful🫠", "You are 96% beautiful🫠", "You are 97% beautiful🫠", "You are 98% beautiful🫠", "You are 99% beautiful🫠", "Oh Oh O My God 😲 Cuteness Overload... My System Is Gonna To Crash Out 🤯 !!", 
-  ];
-  return api.sendMessage(`${data[Math.floor(Math.random() * data.length)]}`, event.threadID, event.messageID);
-	}
+module.exports = {
+  config: {
+    name: "beauty",
+    version: "3.0",
+    author: "Ew'r Saim",
+    role: 0,
+    category: "fun",
+    guide: {
+      en: "Get beauty score with image. Use: beauty [@mention]"
+    }
+  },
+
+  onStart: async function ({ event, message, usersData }) {
+    // Support for mention system
+    const mention = Object.keys(event.mentions);
+    const uid = mention.length > 0 ? mention[0] : event.senderID;
+    const name = await usersData.getName(uid);
+    const percent = Math.floor(Math.random() * 101);
+
+    try {
+      // Read avatar
+      const avatarUrl = `https://graph.facebook.com/${uid}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`;
+      const avatar = await Jimp.read(avatarUrl);
+      avatar.resize(512, 512);
+
+      // Dark overlay for text
+      const overlay = new Jimp(512, 70, "#00000099");
+      avatar.composite(overlay, 0, 442);
+
+      // Load main white font
+      const fontMain = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
+      const fontSmall = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
+
+      // Draw shadowed/outlined text for beauty %
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          if (dx !== 0 || dy !== 0) {
+            avatar.print(fontMain, dx, 455 + dy, {
+              text: `💖 ${percent}% BEAUTIFUL 💖`,
+              alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+            }, 512, 50);
+          }
+        }
+      }
+
+      // Main centered white text
+      avatar.print(fontMain, 0, 455, {
+        text: `💖 ${percent}% BEAUTIFUL 💖`,
+        alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+      }, 512, 50);
+
+      // Owner credit text in bottom-right corner
+      avatar.print(fontSmall, 0, 492, {
+        text: "Owner: Ewr Saim",
+        alignmentX: Jimp.HORIZONTAL_ALIGN_RIGHT
+      }, 500, 20);
+
+      // Save to tmp path
+      const savePath = path.join(__dirname, "..", "..", "tmp", `beauty_${uid}.png`);
+      await fs.ensureDir(path.dirname(savePath));
+      await avatar.writeAsync(savePath);
+
+      // Dynamic message
+      const msg =
+        percent === 100
+          ? `🌟 ${name}, you're 100% beautiful! Perfect! 💎`
+          : percent >= 80
+          ? `🔥 ${name} is looking 🔥 at ${percent}% beauty!`
+          : percent >= 50
+          ? `😊 ${name}'s beauty rating is ${percent}% – not bad!`
+          : `😅 ${name} got only ${percent}% beauty... still special tho!`;
+
+      // Send message with image
+      await message.reply(
+        {
+          body: msg,
+          attachment: fs.createReadStream(savePath)
+        },
+        () => fs.unlinkSync(savePath)
+      );
+    } catch (err) {
+      console.error(err);
+      return message.reply("❌ Couldn't generate beauty image.");
+    }
+  }
 };

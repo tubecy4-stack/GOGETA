@@ -5,14 +5,14 @@ const fs = require("fs")
 module.exports = {
 	config: {
 		name: "arrest",
-		aliases: ["ar"],
+		aliases: ["arrest"],
 		version: "1.0",
 		author: "milan-says",
 		countDown: 5,
 		role: 0,
 		shortDescription: "arret the rapist",
 		longDescription: "",
-		category: "image",
+		category: "fun",
 		guide:  {
 			vi: "{pn} [@tag]",
 			en: "{pn} [@tag]"

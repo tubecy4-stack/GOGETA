@@ -1,27 +1,43 @@
-module.exports.config = {
-	name: "bday",
-	version: "1.0.0",
-	hasPermssion: 0,
-  credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-	description: "See admin's birthday",
-  usePrefix: false,
-	commandCategory: "bday",
-	cooldowns: 5
-}
+const axios = require("axios");
 
-module.exports.run =  ({ api, event, args, client, Users, Threads, __GLOBAL, Currencies }) => {
-  const axios = global.nodemodule["axios"];
-  const request = global.nodemodule["request"];
-  const fs = global.nodemodule["fs-extra"];
-    const t = Date.parse("June 27, 2024 00:00:00") - Date.parse(new Date());
-    const seconds = Math.floor( (t/1000) % 60 );
-    const minutes = Math.floor( (t/1000/60) % 60 );
-    const hours = Math.floor( (t/(1000*60*60)) % 24 );
-    const days = Math.floor( t/(1000*60*60*24) );
-    var callback = () => api.sendMessage(
-  {body:`Time left until Admin - Light birthday\n» ${days} days\n ${hours} hours\n ${minutes} minutes\n ${seconds} seconds. «`, attachment: fs.createReadStream(__dirname + "/cache/1.png")}, event.threadID, () => 
-    fs.unlinkSync(__dirname + "/cache/1.png"));  
-      return request(encodeURI(`https://graph.facebook.com/100037743553265/picture?height=720&width=720&access_token=66262`)).pipe(
-fs.createWriteStream(__dirname+'/cache/1.png')).on('close',() => callback());
-    
-      };
+const mahmhd = async () => {
+  const base = await axios.get("https://raw.githubusercontent.com/mahmudx7/exe/main/baseApiUrl.json");
+  return base.data.mahmud;
+};
+
+module.exports = {
+  config: {
+    name: "birthday",
+    aliases: ["wish"],
+    version: "1.7",
+    role: 0,
+    author: "MahMUD",
+    category: "love",
+    countDown: 5,
+    guide: { en: "{p}{n} @mention" },
+  },
+
+  onStart: async function ({ api, event }) {
+    const mention = Object.keys(event.mentions);
+    if (mention.length === 0) {
+      return api.sendMessage("❌ You need to tag someone to wish!", event.threadID, event.messageID);
+    }
+
+    const taggedUserName = event.mentions[mention[0]].replace('@', '');
+
+    try {
+      const baseApi = await mahmhd();
+      const apiUrl = `${baseApi}/api/wish/font3?taggedUserName=${encodeURIComponent(taggedUserName)}`;
+      const response = await axios.get(apiUrl);
+      const data = response.data;
+
+      if (data.status === "success") {
+        api.sendMessage(data.response, event.threadID, event.messageID);
+      } else {
+        api.sendMessage("❌ Failed to send the birthday wish. Please try again later.", event.threadID, event.messageID);
+      }
+    } catch (err) {
+      api.sendMessage(`❌ Something went wrong: ${err.message}`, event.threadID, event.messageID);
+    }
+  },
+};

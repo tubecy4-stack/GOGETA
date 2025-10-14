@@ -13,7 +13,7 @@ module.exports = {
 		longDescription: {
 			en: "Turn on/off automatically seen when new messages are available"
 		},
-	category: "Admin",
+	category: "owner",
 	guide: {
 	 en: "on/off",
 },

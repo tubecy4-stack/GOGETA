@@ -1,72 +1,77 @@
 const axios = require("axios");
-const fs = require("fs-extra");
+const fs = require("fs");
 const path = require("path");
 
+const mahmud = async () => {
+  const response = await axios.get("https://raw.githubusercontent.com/mahmudx7/exe/main/baseApiUrl.json");
+  return response.data.mahmud;
+};
+
 module.exports = {
- config: {
- name: "anime",
- aliases: ["waifu", "neko", "shinobu", "megumin", "bully", "cuddle", "cry", "hug", "awoo", "kiss", "lick", "pat", "smug", "bonk", "yeet", "blush", "smile", "wave", "highfive", "handhold", "nom", "bite", "glomp", "slap", "kill", "kick", "happy", "wink", "poke", "dance", "cringe"],
- version: "1.4.0",
- author: "Chitron Bhattacharjee",
- countDown: 10,
- role: 0,
- shortDescription: {
- en: "Get random anime-style images with live feedback"
- },
- longDescription: {
- en: "Fetch and send random anime-style images of various categories from the waifu.pics API, with real-time feedback through message reactions."
- },
- category: "anime",
- guide: {
- en: "{prefix}anime [category]\n\nAvailable categories: waifu, neko, shinobu, megumin, bully, cuddle, cry, hug, awoo, kiss, lick, pat, smug, bonk, yeet, blush, smile, wave, highfive, handhold, nom, bite, glomp, slap, kill, kick, happy, wink, poke, dance, cringe"
- }
- },
+  config: {
+    name: "anime",
+    aliases: ["anivid", "animevideo"],
+    version: "1.7",
+    role: 0,
+    author: "MahMUD",
+    category: "anime",
+    guide: {
+      en: "Use {pn} to get a random anime video or {pn} list to see total anime count."
+    }
+  },
 
- onStart: async function ({ api, event, args }) {
- const validCategories = ["waifu", "neko", "shinobu", "megumin", "bully", "cuddle", "cry", "hug", "awoo", "kiss", "lick", "pat", "smug", "bonk", "yeet", "blush", "smile", "wave", "highfive", "handhold", "nom", "bite", "glomp", "slap", "kill", "kick", "happy", "wink", "poke", "dance", "cringe"];
- 
- let category = args[0]?.toLowerCase() || "waifu";
- 
- if (!validCategories.includes(category)) {
- api.setMessageReaction("❓", event.messageID, (err) => {}, true);
- return api.sendMessage(`Invalid category. Available categories are: ${validCategories.join(", ")}`, event.threadID, event.messageID);
- }
+  onStart: async function ({ api, event, message, args }) {
+    try {
+      if (args[0] === "list") {
+        const apiUrl = await mahmud();
+        const response = await axios.get(`${apiUrl}/api/album/list`);
+        const lines = response.data.message.split("\n");
+        const animeCategories = lines.filter(line =>
+          /anime/i.test(line) && !/hanime/i.test(line) && !/Total\s*anime/i.test(line)
+        );
+        if (!animeCategories.length) {
+          return api.sendMessage("❌ | No anime categories found.", event.threadID, event.messageID);
+        }
+        return api.sendMessage(animeCategories.join("\n"), event.threadID, event.messageID);
+      }
 
- api.setMessageReaction("⏳", event.messageID, (err) => {}, true);
+      const loadingMessage = await message.reply("🐤 | 𝗟𝗼𝗮𝗱𝗶𝗻𝗴 𝗿𝗮𝗻𝗱𝗼𝗺 𝗮𝗻𝗶𝗺𝗲 𝘃𝗶𝗱𝗲𝗼...𝗣𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁..!!");
 
- try {
- const response = await axios.get(`https://api.waifu.pics/sfw/${category}`);
- const imageUrl = response.data.url;
+      setTimeout(() => {
+        api.unsendMessage(loadingMessage.messageID);
+      }, 5000);
 
- const imageName = `${category}.jpg`;
- const imagePath = path.join(__dirname, 'cache', imageName);
+      const apiUrl = await mahmud();
+      const res = await axios.get(`${apiUrl}/api/album/videos/anime?userID=${event.senderID}`);
+      if (!res.data.success || !res.data.videos.length)
+        return api.sendMessage("❌ | No videos found.", event.threadID, event.messageID);
 
- const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
- await fs.outputFile(imagePath, imageResponse.data);
+      const url = res.data.videos[Math.floor(Math.random() * res.data.videos.length)];
+      const filePath = path.join(__dirname, "temp_video.mp4");
 
- api.setMessageReaction("🖼️", event.messageID, (err) => {}, true);
+      const video = await axios({
+        url,
+        method: "GET",
+        responseType: "stream",
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      });
 
- await api.sendMessage(
- {
- attachment: fs.createReadStream(imagePath),
- body: `🌸 Here's your random ${category} image:`
- },
- event.threadID,
- (err, info) => {
- if (err) {
- console.error(`Error sending image for ${category}:`, err);
- api.setMessageReaction("❌", event.messageID, (err) => {}, true);
- } else {
- api.setMessageReaction("✅", event.messageID, (err) => {}, true);
- }
- }
- );
+      const writer = fs.createWriteStream(filePath);
+      video.data.pipe(writer);
 
- await fs.remove(imagePath);
- } catch (error) {
- console.error(`Error in anime command (${category}):`, error);
- api.sendMessage(`Sorry, I couldn't fetch a ${category} image right now. Please try again later.`, event.threadID, event.messageID);
- api.setMessageReaction("❌", event.messageID, (err) => {}, true);
- }
- }
+      writer.on("finish", () => {
+        api.sendMessage({
+          body: "✨ | 𝐇𝐞𝐫𝐞'𝐬 𝐲𝐨𝐮𝐫 𝐚𝐧𝐢𝐦𝐞 𝐯𝐢𝐝𝐞𝐨",
+          attachment: fs.createReadStream(filePath)
+        }, event.threadID, () => fs.unlinkSync(filePath), event.messageID);
+      });
+
+      writer.on("error", () => {
+        api.sendMessage("❌ | Download error.", event.threadID, event.messageID);
+      });
+    } catch (e) {
+      console.error("ERROR:", e);
+      api.sendMessage("❌ | Failed to fetch or send video.", event.threadID, event.messageID);
+    }
+  }
 };

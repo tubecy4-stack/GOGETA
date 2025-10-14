@@ -2,13 +2,13 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 
-let isEnabled = true;
+let isEnabled = true; // default: on
 
 module.exports = {
   config: {
     name: "alldl",
-    version: "1.4",
-    author: "NeoKEX",
+    version: "1.1",
+    author: "nexo_here + Modified by Rifat",
     role: 0,
     shortDescription: "Auto download media from supported links (no prefix)",
     longDescription: "Auto detects media links (Instagram, TikTok, etc) and downloads them",
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   onStart: async function ({ message, args, event }) {
-    const permission = ["100083039411474"]; 
+    const permission = ["100014657416389"]; // <-- শুধু মালিকরা টগল করতে পারবে
     if (["on", "off", "status"].includes(args[0])) {
       if (!permission.includes(event.senderID)) return message.reply("⚠️ | Only the bot owner can toggle this feature.");
 
@@ -50,7 +50,7 @@ module.exports = {
     if (!urlMatch) return;
 
     const url = urlMatch[0];
-    const apiUrl = `https://neokex-apis.onrender.com/alldl?url=${encodeURIComponent(url)}`;
+    const apiUrl = `https://smfahim.xyz/alldl?url=${encodeURIComponent(url)}`;
 
     try {
       api.setMessageReaction("⏳", event.messageID, () => {}, true);
@@ -58,29 +58,19 @@ module.exports = {
       const res = await axios.get(apiUrl);
       const result = res.data;
 
-      if (!result.success || !result.download_url) {
+      if (!result.status || !result.links || (!result.links.hd && !result.links.sd)) {
         api.setMessageReaction("❌", event.messageID, () => {}, true);
-        return; 
+        return;
       }
 
-      const mediaUrl = result.download_url;
-      const title = result.title || "Video"; 
+      const mediaUrl = result.links.hd || result.links.sd;
       const fileName = `download.mp4`;
       const filePath = path.join(__dirname, "cache", fileName);
 
-      let file;
-      try {
-        file = await axios.get(mediaUrl, { responseType: "arraybuffer" });
-      } catch (downloadErr) {
-        console.error("[alldl] Download Error:", downloadErr.message);
-        api.setMessageReaction("❌", event.messageID, () => {}, true);
-        return; 
-      }
-      
+      const file = await axios.get(mediaUrl, { responseType: "arraybuffer" });
       fs.writeFileSync(filePath, Buffer.from(file.data, "binary"));
 
       api.sendMessage({
-        body: `${title}\nPlatform: ${result.platform}\nDuration: ${result.duration} seconds`,
         attachment: fs.createReadStream(filePath)
       }, event.threadID, () => {
         fs.unlinkSync(filePath);
@@ -88,9 +78,8 @@ module.exports = {
       }, event.messageID);
 
     } catch (err) {
-      console.error("[alldl] API Error:", err.message);
+      console.error("[alldl] Error:", err.message);
       api.setMessageReaction("❌", event.messageID, () => {}, true);
-      return; 
     }
   }
 };

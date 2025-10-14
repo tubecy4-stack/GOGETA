@@ -1,16 +1,20 @@
-module.exports.config = {
-	name: "bot-say",
-	version: "1.1.1",
-	hasPermssion: 0,
-	credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-	description: "Bot Saying",
-	commandCategory: "ai",
-	usages: "[text/message/chat]",
-	cooldowns: 5
-};
+module.exports = {
+	config: {
+		name: "botsay",
+		version: "1.0",
+		author: "Samir", // Time to wait before executing command again (seconds)
+		role: 0,
+		category: "text",
+		guide: {
+			vi: "Not Available",
+			en: "botsays + (Message You Want To Get)"
+		} 
+	},
 
-module.exports.run = async ({ api, event,args }) => {
-var say = args.join(" ")
+	onStart: async function ({ api, args, event }) {
+	var say = args.join(" ")
 	if (!say) api.sendMessage("Please enter a message", event.threadID, event.messageID)
 	else api.sendMessage(`${say}`, event.threadID, event.messageID);
-}
+	}
+
+};
