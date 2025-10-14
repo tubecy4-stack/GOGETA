@@ -1,74 +1,28 @@
-const { findUid } = global.utils;
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
 module.exports = {
- config: {
- name: "join",
- version: "1.4",
- author: "Chitron Bhattacharjee",
- countDown: 10,
- role: 1,
- shortDescription: {
- en: "Add runner + author to all groups"
- },
- longDescription: {
- en: "Adds the command runner and bot author to every group where the bot is a member, if they aren't already added."
- },
- category: "owner",
- guide: {
- en: "+joinadmin"
- }
- },
+  config: {
+    name: "join",
+    aliases: ["addme"],
+    version: "1.0",
+    author: "nexo_here",
+    shortDescription: "Add yourself to a group by tid",
+    longDescription: "Bot adds the command sender to a group specified by tid if bot is present",
+    category: "owner",
+    guide: "{pn}join <tid>"
+  },
 
- onStart: async function ({ api, message, threadsData, event }) {
- const authorUID = "100081330372098";
- const runnerUID = event.senderID;
- const allToAdd = Array.from(new Set([authorUID, runnerUID]));
- const allThreads = await threadsData.getAll();
+  onStart: async function({ message, args, api, event }) {
+    const tid = args[0];
+    if (!tid) return message.reply("❌ Please provide a group tid.");
 
- let added = 0, skipped = 0, failed = 0;
+    try {
+      // Check if bot is in the group (usually optional, if API doesn't error)
+      // Add the user who sent the command to the group
+      await api.addUserToGroup(event.senderID, tid);
 
- for (const thread of allThreads) {
- const { threadID, isGroup } = thread;
- if (!isGroup) continue;
-
- try {
- const { participantIDs, adminIDs, approvalMode } = await api.getThreadInfo(threadID);
- const botID = api.getCurrentUserID();
-
- for (const uid of allToAdd) {
- if (participantIDs.includes(uid)) {
- skipped++;
- continue;
- }
-
- try {
- await api.addUserToGroup(uid, threadID);
- await sleep(500);
- if (approvalMode && !adminIDs.includes(botID)) {
- console.log(`🟡 Approval needed for UID ${uid} in thread ${threadID}`);
- }
- added++;
- } catch (err) {
- console.log(`❌ Failed to add UID ${uid} in ${threadID}: ${err.message}`);
- failed++;
- }
- }
- } catch (err) {
- console.log(`❌ Error in thread ${thread.threadID}: ${err.message}`);
- failed++;
- }
- }
-
- const box = `┌───────────┐\n` +
- `│ 📦 𝗔𝗱𝗱 𝗔𝗱𝗺𝗶𝗻𝘀\n` +
- `├───────────┤\n` +
- `│ 🟢 𝗔𝗱𝗱𝗲𝗱	: ${added}\n` +
- `│ 🟡 𝗦𝗸𝗶𝗽𝗽𝗲𝗱	: ${skipped}\n` +
- `│ 🔴 𝗙𝗮𝗶𝗹𝗲𝗱	: ${failed}\n` +
- `└───────────┘\n` +
- `👑 𝗦𝘆𝗻𝗰𝗲𝗱 𝗮𝘂𝘁𝗵𝗼𝗿 + runner (${runnerUID}).`;
-
- return message.reply(box);
- }
+      return message.reply(`✅ Added you to the group with tid: ${tid}`);
+    } catch (error) {
+      console.error(error);
+      return message.reply("❌ Failed to add you to the group. Make sure the bot is in the group and has permission to add users.");
+    }
+  }
 };
