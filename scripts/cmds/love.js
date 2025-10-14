@@ -1,80 +1,57 @@
-module.exports.config = {
+const axios = require("axios");
+const fs = require("fs-extra");
+const path = require("path");
+
+module.exports = {
+  config: {
     name: "love",
-    version: "2.6.0",
-    hasPermssion: 0,
-    credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-    description: "",
-    commandCategory: "Love",
-    usages: "[tag]",
-    cooldowns: 5,
-    dependencies: {
-        "axios": "",
-        "fs-extra": "",
-        "path": "",
-        "jimp": ""
+    version: "1.0",
+    author: "Chitron Bhattacharjee",
+    countDown: 10,
+    role: 0,
+    shortDescription: {
+      en: "Create a love ship image of two users"
+    },
+    description: {
+      en: "Generates a cute ship image between two user avatars"
+    },
+    category: "𝗙𝗨𝗡 & 𝗚𝗔𝗠𝗘",
+    guide: {
+      en: "{p}ship @user1 @user2\nExample: {p}ship @alice @bob"
     }
+  },
+
+  onStart: async function ({ api, event, message }) {
+    const { mentions, senderID, type, messageReply } = event;
+
+    // Require exactly two mentions
+    const mentionIDs = Object.keys(mentions);
+    if (mentionIDs.length < 2) {
+      return message.reply("❌ | Please mention two users to ship. Example:\n+ship @user1 @user2");
+    }
+
+    const uid1 = mentionIDs[0];
+    const uid2 = mentionIDs[1];
+
+    // Get profile picture URLs
+    const avatar1 = `https://graph.facebook.com/${uid1}/picture?width=512&height=512&access_token=350685531728|62f8ce9f74b12f84c123cc23437a4a32`;
+    const avatar2 = `https://graph.facebook.com/${uid2}/picture?width=512&height=512&access_token=350685531728|62f8ce9f74b12f84c123cc23437a4a32`;
+
+    try {
+      const res = await axios.get(`https://api.popcat.xyz/v2/ship?user1=${encodeURIComponent(avatar1)}&user2=${encodeURIComponent(avatar2)}`, {
+        responseType: "arraybuffer"
+      });
+
+      const filePath = path.join(__dirname, "cache", `ship_${uid1}_${uid2}_${Date.now()}.png`);
+      fs.writeFileSync(filePath, res.data);
+
+      message.reply({
+        body: "❤️ Here's your ship image! ❤️",
+        attachment: fs.createReadStream(filePath)
+      }, () => fs.unlinkSync(filePath));
+    } catch (err) {
+      console.error(err);
+      message.reply("❌ | Failed to generate ship image. Try again later.");
+    }
+  }
 };
-
-module.exports.onLoad = async() => {
-    const { resolve } = global.nodemodule["path"];
-    const { existsSync, mkdirSync } = global.nodemodule["fs-extra"];
-    const { downloadFile } = global.utils;
-    const dirMaterial = __dirname + `/cache/canvas/`;
-    const path = resolve(__dirname, 'cache/canvas', 'love2.jpg');
-    if (!existsSync(dirMaterial + "canvas")) mkdirSync(dirMaterial, { recursive: true });
-    if (!existsSync(path)) await downloadFile("https://i.imgur.com/JTvb5yc.png", path);
-}
-
-async function makeImage({ one, two }) {
-    const fs = global.nodemodule["fs-extra"];
-    const path = global.nodemodule["path"];
-    const axios = global.nodemodule["axios"]; 
-    const jimp = global.nodemodule["jimp"];
-    const __root = path.resolve(__dirname, "cache", "canvas");
-
-    let tromcho_img = await jimp.read(__root + "/love2.jpg");
-    let pathImg = __root + `/love2_${one}_${two}.png`;
-    let avatarOne = __root + `/avt_${one}.png`;
-    let avatarTwo = __root + `/avt_${two}.png`;
-    
-    let getAvatarOne = (await axios.get(`https://graph.facebook.com/${one}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`, { responseType: 'arraybuffer' })).data;
-    fs.writeFileSync(avatarOne, Buffer.from(getAvatarOne, 'utf-8'));
-    
-    let getAvatarTwo = (await axios.get(`https://graph.facebook.com/${two}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`, { responseType: 'arraybuffer' })).data;
-    fs.writeFileSync(avatarTwo, Buffer.from(getAvatarTwo, 'utf-8'));
-    
-    let circleOne = await jimp.read(await circle(avatarOne));
-    let circleTwo = await jimp.read(await circle(avatarTwo));
-    tromcho_img.composite(circleOne.resize(270, 270), 800, 100).composite(circleTwo.resize(300, 300), 205, 300);
-    
-    let raw = await tromcho_img.getBufferAsync("image/png");
-    
-    fs.writeFileSync(pathImg, raw);
-    fs.unlinkSync(avatarOne);
-    fs.unlinkSync(avatarTwo);
-    
-    return pathImg;
-}
-async function circle(image) {
-    const jimp = require("jimp");
-    image = await jimp.read(image);
-    image.circle();
-    return await image.getBufferAsync("image/png");
-}
-
-module.exports.run = async function ({ event, api, args }) {
-    const fs = global.nodemodule["fs-extra"];
-    const { threadID, messageID, senderID } = event;
-    var mention = Object.keys(event.mentions)[0]
-    let tag = event.mentions[mention].replace("@", "");
-    if (!mention) return api.sendMessage("Please tag 1 person", threadID, messageID);
-    else {
-        var one = senderID, two = mention;
-        return makeImage({ one, two }).then(path => api.sendMessage({ body: "This "  +  tag + ' love you so much💔',
-            mentions: [{
-          tag: tag,
-          id: mention
-        }],
-     attachment: fs.createReadStream(path) }, threadID, () => fs.unlinkSync(path), messageID));
-    }
-}

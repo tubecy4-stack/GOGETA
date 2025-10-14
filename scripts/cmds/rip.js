@@ -1,3 +1,4 @@
+
 const DIG = require("discord-image-generation");
 const fs = require("fs-extra");
 
@@ -5,12 +6,12 @@ module.exports = {
   config: {
     name: "rip",
     version: "1.1",
-    author: "MILAN",
+    author: "Chitron Bhattacharjee",
     countDown: 5,
     role: 0,
     shortDescription: "rip image",
     longDescription: "rip image",
-    category: "fun",
+    category: "𝗙𝗨𝗡 & 𝗚𝗔𝗠𝗘",
     guide: {
       vi: "{pn} [@tag | blank]",
       en: "{pn} [@tag]"

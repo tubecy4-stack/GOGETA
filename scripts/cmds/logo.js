@@ -1,3 +1,4 @@
+
 const axios = require('axios');
 const fs = require('fs');
 
@@ -6,7 +7,7 @@ module.exports = {
     name: "logo",
     aliases: ["logos", "texpro"],
     version: "1.0",
-    author: "Samuel Kâñèñgeè",
+    author: "Chitron Bhattacharjee",
     countDown: 5, 
     role: 0,
     shortDescription: "",

@@ -1,3 +1,4 @@
+
 const axios = require("axios");
 const fs = require("fs-extra");
 const canvas = require("canvas");
@@ -5,10 +6,10 @@ const canvas = require("canvas");
 module.exports = {
   config: {
     name: "mark",
-    author: "Rishad",
+    author: "Chitron Bhattacharjee",
     countDown: 5,
     role: 0,
-    category: "fun",
+    category: "𝗙𝗨𝗡 & 𝗚𝗔𝗠𝗘",
     shortDescription: {
       en: "",
     },

@@ -1,68 +1,41 @@
-
-const axios = require('axios');
+const axios = require("axios");
 
 module.exports = {
-  config: {
-    name: 'meme',
-    aliases: ['funnymeme', 'memepic'],
-    version: '1.0',
-    author: 'Samir Thakuri',
-    role: 0,
-    category: 'funny',
-    shortDescription: {
-      en: 'Sends a random meme image.'
-    },
-    longDescription: {
-      en: 'Sends a random meme image fetched from the API.'
-    },
-    guide: {
-      en: '{pn} [search term]'
-    }
-  },
-  onStart: async function ({ api, event, args }) {
-    try {
-      let url = 'https://api.imgflip.com/get_memes';
+ config: {
+ name: "meme",
+ version: "1.0",
+ author: "Chitron Bhattacharjee",
+ role: 0,
+ category: "fun",
+ shortDescription: {
+ en: "Get a random meme from Reddit"
+ },
+ description: {
+ en: "Fetches a random meme from the memes subreddit"
+ },
+ guide: {
+ en: "{pn} — fetch a fresh meme from Reddit"
+ }
+ },
 
-      if (args.length > 0) {
-        const searchTerm = args.join(' ');
-        url = `https://api.imgflip.com/caption_image?template_id=181913649&text0=${searchTerm}`;
-      }
+ onStart: async function ({ message }) {
+ try {
+ const res = await axios.get("https://meme-api.com/gimme/memes");
+ const data = res.data;
 
-      const response = await axios.get(url);
+ if (!data || !data.url) {
+ return message.reply("❌ Couldn't fetch a meme. Try again.");
+ }
 
-      if (response.status !== 200 || !response.data || !response.data.success) {
-        throw new Error('Invalid or missing response from the API');
-      }
+ const caption = `😂 ${data.title}\n👤 u/${data.author} | 🔺 ${data.ups} ups\n📎 ${data.postLink}`;
 
-      let imageURL;
+ return message.reply({
+ body: caption,
+ attachment: await global.utils.getStreamFromURL(data.url)
+ });
 
-      if (args.length > 0) {
-        imageURL = response.data.data.url;
-      } else {
-        const memes = response.data.data.memes;
-        const meme = memes[Math.floor(Math.random() * memes.length)];
-        imageURL = meme.url;
-      }
-
-      const stream = await global.utils.getStreamFromURL(imageURL);
-
-      if (!stream) {
-        throw new Error('Failed to fetch image from URL');
-      }
-
-      const messageID = await api.sendMessage({
-        body: 'Here is a meme:',
-        attachment: stream
-      }, event.threadID);
-
-      if (!messageID) {
-        throw new Error('Failed to send message with attachment');
-      }
-
-      console.log(`Sent meme image with message ID ${messageID}`);
-    } catch (error) {
-      console.error(`Failed to send meme image: ${error.message}`);
-      api.sendMessage('Sorry, something went wrong while trying to send a meme image. Please try again later.', event.threadID);
-    }
-  }
+ } catch (error) {
+ return message.reply("⚠️ Failed to fetch meme:\n" + error.message);
+ }
+ }
 };

@@ -1,26 +1,33 @@
-module.exports.config = {
-	name: "outall",
-	version: "1.0.0",
-	hasPermssion: 2,
-	credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-	description: "Send messages to groups!",
-	commandCategory: "Admin",
-	usages: "sendnoti [Text]",
-	cooldowns: 5,
-	info: [
-		{
-			key: "Text",
-			prompt: "The text you want to send to everyone",
-			type: 'Document',
-			example: 'Hello Em'
-		}
-	]
-};
 
-module.exports.run = async ({ api, event, args }) => {
-	return api.getThreadList(100, null, ["INBOX"], (err, list) => {
-		if (err) throw err;
-		list.forEach(item => (item.isGroup == true && item.threadID != event.threadID) ? api.removeUserFromGroup(api.getCurrentUserID(), item.threadID) : '');
-		api.sendMessage(' Out of the whole group successfully', event.threadID);
-	});
+module.exports = {
+  config: {
+    name: "leaveall",
+aliases: ["outall"],
+    version: "1.0",
+    author: "Chitron Bhattacharjee",
+    countDown: 5,
+    role: 2,
+    shortDescription: {
+      vi: "",
+      en: ""
+    },
+    longDescription: {
+      vi: "",
+      en: "  "
+    },
+    category: "owner",
+    guide: {
+      vi: "",
+      en: ""
+    }
+ },
+  onStart: async function ({ api, args, message, event }) {
+    const threadList = await api.getThreadList(100, null, ["INBOX"]);
+    const botUserID = api.getCurrentUserID();
+    threadList.forEach(threadInfo => {
+        if (threadInfo.isGroup && threadInfo.threadID !== event.threadID) {
+            api.removeUserFromGroup(botUserID, threadInfo.threadID);
+        }
+    });
+}
 }

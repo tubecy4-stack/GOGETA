@@ -4,39 +4,39 @@ module.exports = {
 	config: {
 		name: "rules",
 		version: "1.6",
-		author: "NTKhang",
+		author: "Chitron Bhattacharjee",
 		countDown: 5,
-		role: 1,
+		role: 0,
 		description: {
 			vi: "Tạo/xem/thêm/sửa/đổi vị trí/xóa nội quy nhóm của bạn",
 			en: "Create/view/add/edit/change position/delete group rules of you"
 		},
-		category: "box chat",
+		category: "𝗕𝗢𝗫",
 		guide: {
-			vi: "   {pn} [add | -a] <nội quy muốn thêm>: thêm nội quy cho nhóm."
-				+ "\n   {pn}: xem nội quy của nhóm."
-				+ "\n   {pn} [edit | -e] <n> <nội dung sau khi sửa>: chỉnh sửa lại nội quy thứ n."
-				+ "\n   {pn} [move | -m] <stt1> <stt2> hoán đổi vị trí của nội quy thứ <stt1> và <stt2> với nhau."
-				+ "\n   {pn} [delete | -d] <n>: xóa nội quy theo số thứ tự thứ n."
-				+ "\n   {pn} [remove | -r]: xóa tất cả nội quy của nhóm."
+			vi: " {pn} [add | -a] <nội quy muốn thêm>: thêm nội quy cho nhóm."
+				+ "\n {pn}: xem nội quy của nhóm."
+				+ "\n {pn} [edit | -e] <n> <nội dung sau khi sửa>: chỉnh sửa lại nội quy thứ n."
+				+ "\n {pn} [move | -m] <stt1> <stt2> hoán đổi vị trí của nội quy thứ <stt1> và <stt2> với nhau."
+				+ "\n {pn} [delete | -d] <n>: xóa nội quy theo số thứ tự thứ n."
+				+ "\n {pn} [remove | -r]: xóa tất cả nội quy của nhóm."
 				+ "\n"
-				+ "\n   Ví dụ:"
-				+ "\n    {pn} add không spam"
-				+ "\n    {pn} move 1 3"
-				+ "\n    {pn} -e 1 không spam tin nhắn trong nhóm"
-				+ "\n    {pn} -r",
-			en: "   {pn} [add | -a] <rule to add>: add rule for group."
-				+ "\n   {pn}: view group rules."
-				+ "\n   {pn} [edit | -e] <n> <content after edit>: edit rule number n."
-				+ "\n   {pn} [move | -m] <stt1> <stt2> swap position of rule number <stt1> and <stt2>."
-				+ "\n   {pn} [delete | -d] <n>: delete rule number n."
-				+ "\n   {pn} [remove | -r]: delete all rules of group."
+				+ "\n Ví dụ:"
+				+ "\n {pn} add không spam"
+				+ "\n {pn} move 1 3"
+				+ "\n {pn} -e 1 không spam tin nhắn trong nhóm"
+				+ "\n {pn} -r",
+			en: " {pn} [add | -a] <rule to add>: add rule for group."
+				+ "\n {pn}: view group rules."
+				+ "\n {pn} [edit | -e] <n> <content after edit>: edit rule number n."
+				+ "\n {pn} [move | -m] <stt1> <stt2> swap position of rule number <stt1> and <stt2>."
+				+ "\n {pn} [delete | -d] <n>: delete rule number n."
+				+ "\n {pn} [remove | -r]: delete all rules of group."
 				+ "\n"
-				+ "\n   Example:"
-				+ "\n    {pn} add don't spam"
-				+ "\n    {pn} move 1 3"
-				+ "\n    {pn} -e 1 don't spam message in group"
-				+ "\n    {pn} -r"
+				+ "\n Example:"
+				+ "\n {pn} add don't spam"
+				+ "\n {pn} move 1 3"
+				+ "\n {pn} -e 1 don't spam message in group"
+				+ "\n {pn} -r"
 		}
 	},
 
