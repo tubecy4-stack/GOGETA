@@ -1,8 +1,8 @@
  module.exports.config = {
-	name: "help",
+	name: "help2",
 	version: "1.0.2",
 	hasPermssion: 0,
-	credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
+	credits: "PetterSever",
 	description: "Beginner's Guide",
 	commandCategory: "system",
 	usages: "[Tên module]",
@@ -54,7 +54,7 @@ module.exports. run = function({ api, event, args, getText }) {
 	if (!command) {
 		const arrayInfo = [];
 		const page = parseInt(args[0]) || 1;
-    const numberOfOnePage = 10;
+    const numberOfOnePage = 9999;
     //*số thứ tự 1 2 3.....cú pháp ${++i}*//
     let i = 0;
     let msg = "";
@@ -70,12 +70,12 @@ module.exports. run = function({ api, event, args, getText }) {
     i = startSlice;
     const returnArray = arrayInfo.slice(startSlice, startSlice + numberOfOnePage);
     
-    for (let item of returnArray) msg += `「 ${++i} 」${prefix}${item}\n`;
+    for (let item of returnArray) msg += `✰『 ${++i} 』 ➬${item} \n`;
     
     
-    const siu = `Command list 📄\nMade by Prîyánsh Rajput 🥀\nFor More Information type /help (command name) ✨\n󰂆 󰟯 󰟰 󰟷 󰟺 󰟵 󰟫`;
+    const siu = `Page Cmds  💯💯💖𝐌𝐚𝐝𝐞 𝐁𝐲 𝐀𝐫𝐮𝐧 𝐤𝐮𝐦𝐚𝐫`;
     
- const text = `\nPage (${page}/${Math.ceil(arrayInfo.length/numberOfOnePage)})\n`;
+ const text = `\nPage (${page}/${Math.ceil(arrayInfo.length/numberOfOnePage)})`;
  
     return api.sendMessage(siu + "\n\n" + msg  + text, threadID, async (error, info) => {
 			if (autoUnsend) {
