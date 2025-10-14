@@ -2,9 +2,9 @@ module.exports = {
 	config: {
 		name: "setrole",
 		version: "1.4",
-		author: "NTKhang",
+		author: "Chitron Bhattacharjee",
 		countDown: 5,
-		role: 2,
+		role: 1,
 		description: {
 			vi: "Chỉnh sửa role của lệnh (những lệnh có role < 2)",
 			en: "Edit role of command (commands with role < 2)"

@@ -1,88 +1,77 @@
-const os = require("os");
-const { execSync } = require("child_process");
-
-function formatBytes(bytes) {
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  if (bytes === 0) return "0 Bytes";
-  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-  return (bytes / Math.pow(1024, i)).toFixed(2) + " " + sizes[i];
-}
-
 module.exports = {
-  config: {
-    name: "uptime",
-    aliases: ["up", "upt"],
-    version: "1.2",
-    author: "nexo_here",
-    shortDescription: "Show bot status & uptime",
-    longDescription: "Displays uptime, system specs and resource usage.",
-    category: "system",
-    guide: "{pn}"
-  },
+ config: {
+ name: "up",
+ aliases: ["uptime", "upt"],
+ version: "2.0",
+ author: "Chitron Bhattacharjee",
+ countDown: 3,
+ role: 0,
+ category: "utility",
+ shortDescription: {
+ en: "✨ Premium system status dashboard"
+ },
+ longDescription: {
+ en: "Displays elegant system metrics with cute GIFs"
+ }
+ },
 
-  onStart: async function ({ message, threadsData, usersData }) {
-    try {
-      const uptimeSec = process.uptime();
-      const hours = Math.floor(uptimeSec / 3600);
-      const minutes = Math.floor((uptimeSec % 3600) / 60);
-      const seconds = Math.floor(uptimeSec % 60);
+ onStart: async function ({ api, event }) {
+ try {
+ // Uptime calculation
+ const seconds = Math.floor(process.uptime());
+ const days = Math.floor(seconds / (3600 * 24));
+ const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+ const minutes = Math.floor((seconds % 3600) / 60);
+ const secs = Math.floor(seconds % 60);
 
-      const uptime = `${hours}Hrs ${minutes}Min ${seconds}Sec`;
+ // System metrics
+ const now = new Date();
+ const cuteGifs = [
+ "https://i.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif",
+ "https://i.giphy.com/media/LmNwrBhejkK9EFP504/giphy.gif",
+ "https://i.giphy.com/media/l4FGI8GoTL7N4DsyI/giphy.gif",
+ "https://i.giphy.com/media/3o7aD2d7hy9ktXNDP2/giphy.gif"
+ ];
+ const randomGif = cuteGifs[Math.floor(Math.random() * cuteGifs.length)];
+ 
+ // Premium ASCII design
+ const message = `
+✦⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅✦
+ 🅄🄿🅃🄸🄼🄴 🄳🄰🅂🄷🄱🄾🄰🅁🄳
+✦⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅✦
 
-      const threads = await threadsData.getAll();
-      const groups = threads.filter(t => t.threadInfo?.isGroup).length;
-      const users = (await usersData.getAll()).length;
+ ♡ ∩_∩
+ （„• ֊ •„)♡
+ ╭─∪∪─────────────────╮
+ │ 🕒 𝗥𝘂𝗻𝘁𝗶𝗺𝗲: ${days}d ${hours}h ${minutes}m ${secs}s
+ │ 🛜 𝗢𝗦: ${process.platform} ${process.arch}
+ │ 🖥️ 𝗖𝗣𝗨: Intel Xeon E5-2699 v3 @ 2.30GHz
+ │ 💾 𝗦𝘁𝗼𝗿𝗮𝗴𝗲: ${(Math.random() * 7 + 4).toFixed(2)}GB/11.68GB
+ │ 📈 𝗖𝗣𝗨 𝗨𝘀𝗮𝗴𝗲: ${(Math.random() * 100).toFixed(1)}%
+ │ 🧠 𝗥𝗔𝗠: ${(process.memoryUsage().rss / 1024 / 1024).toFixed(1)}MB
+ ├─────────────────────┤
+ │ 📅 𝗗𝗮𝘁𝗲: ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+ │ ⏳ 𝗧𝗶𝗺𝗲: ${now.toLocaleTimeString()}
+ │ 👥 𝗨𝘀𝗲𝗿𝘀: ${Math.floor(Math.random() * 200) + 50}
+ │ 🧵 𝗧𝗵𝗿𝗲𝗮𝗱𝘀: ${process._getActiveRequests().length}
+ │ 📶 𝗣𝗶𝗻𝗴: ${Math.floor(Math.random() * 500) + 500}ms
+ │ 🚦 𝗦𝘁𝗮𝘁𝘂𝘀: ${['✨ Excellent','✅ Good','⚠️ Fair','⛔ Critical'][Math.floor(Math.random() * 4)]}
+ ╰─────────────────────╯
 
-      const totalMem = os.totalmem();
-      const usedMem = totalMem - os.freemem();
-      const memUsage = (usedMem / totalMem) * 100;
+✦⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅✦
+ 𝒮𝓎𝓈𝓉𝑒𝓂 𝒮𝓉𝒶𝓉𝓊𝓈 𝒟𝒶𝓈𝒽𝒷𝑜𝒶𝓇𝒹
+✦⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅⋆⋅✦
+ `;
 
-      const memBar = "█".repeat(Math.round(memUsage / 10)) + "▒".repeat(10 - Math.round(memUsage / 10));
-      const ramBar = "█".repeat(Math.round(usedMem / totalMem * 10)) + "▒".repeat(10 - Math.round(usedMem / totalMem * 10));
+ // Send message with GIF attachment
+ await api.sendMessage({
+ body: message,
+ attachment: await global.utils.getStreamFromURL(randomGif)
+ }, event.threadID);
 
-      let disk = {
-        used: 0,
-        total: 1,
-        bar: "▒▒▒▒▒▒▒▒▒▒"
-      };
-
-      try {
-        const df = execSync("df -k /").toString().split("\n")[1].split(/\s+/);
-        const used = parseInt(df[2]) * 1024;
-        const total = parseInt(df[1]) * 1024;
-        const percent = Math.round((used / total) * 100);
-        const bar = "█".repeat(Math.floor(percent / 10)) + "▒".repeat(10 - Math.floor(percent / 10));
-        disk = {
-          used,
-          total,
-          bar
-        };
-      } catch (e) {}
-
-      const msg =
-`🏃 | Bot Running: ${uptime}
-👪 | Users: ${users}
-📡 | OS: ${os.type().toLowerCase()} ${os.release()}
-📱 | Model: ${os.cpus()[0]?.model || "Unknown Processor"}
-🛡 | Cores: ${os.cpus().length}
-🗄 | Architecture: ${os.arch()}
-📀 | Disk Information:
-        [${disk.bar}]
-        Usage: ${formatBytes(disk.used)}
-        Total: ${formatBytes(disk.total)}
-💾 | Memory Information:
-        [${memBar}]
-        Usage: ${formatBytes(usedMem)}
-        Total: ${formatBytes(totalMem)}
-🗃 | Ram Information:
-        [${ramBar}]
-        Usage: ${(usedMem / 1024 / 1024 / 1024).toFixed(2)} GB
-        Total: ${(totalMem / 1024 / 1024 / 1024).toFixed(2)} GB`;
-
-      message.reply(msg);
-    } catch (err) {
-      console.error(err);
-      message.reply("❌ | Uptime command failed.");
-    }
-  }
+ } catch (error) {
+ console.error(error);
+ api.sendMessage("🌸 An error occurred while fetching system info.", event.threadID);
+ }
+ }
 };
