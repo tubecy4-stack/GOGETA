@@ -5,7 +5,7 @@ module.exports = {
 		name: "loadconfig",
 		aliases: ["loadcf"],
 		version: "1.4",
-		author: "Chitron Bhattacharjee",
+		author: "NTKhang",
 		countDown: 5,
 		role: 2,
 		description: {

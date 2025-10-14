@@ -1,41 +1,47 @@
 const axios = require("axios");
 
+const mahmud = async () => {
+  const base = await axios.get("https://raw.githubusercontent.com/mahmudx7/exe/main/baseApiUrl.json");
+  return base.data.mahmud;
+};
+
 module.exports = {
- config: {
- name: "meme",
- version: "1.0",
- author: "Chitron Bhattacharjee",
- role: 0,
- category: "fun",
- shortDescription: {
- en: "Get a random meme from Reddit"
- },
- description: {
- en: "Fetches a random meme from the memes subreddit"
- },
- guide: {
- en: "{pn} — fetch a fresh meme from Reddit"
- }
- },
+  config: {
+    name: "meme",
+    aliases: ["memes"],
+    version: "1.7",
+    author: "MahMUD",
+    countDown: 10,
+    role: 0,
+    category: "fun",
+    guide: "{pn}"
+  },
 
- onStart: async function ({ message }) {
- try {
- const res = await axios.get("https://meme-api.com/gimme/memes");
- const data = res.data;
+  onStart: async function ({ message, event, api }) {
+    try {
+      const apiUrl = await mahmud();
+      const res = await axios.get(`${apiUrl}/api/meme`);
+      const imageUrl = res.data?.imageUrl;
 
- if (!data || !data.url) {
- return message.reply("❌ Couldn't fetch a meme. Try again.");
- }
+      if (!imageUrl) {
+        return message.reply("Could not fetch meme. Please try again later.");
+      }
 
- const caption = `😂 ${data.title}\n👤 u/${data.author} | 🔺 ${data.ups} ups\n📎 ${data.postLink}`;
+      const stream = await axios({
+        method: "GET",
+        url: imageUrl,
+        responseType: "stream",
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      });
 
- return message.reply({
- body: caption,
- attachment: await global.utils.getStreamFromURL(data.url)
- });
+      await api.sendMessage({
+        body: "🐸 | 𝐇𝐞𝐫𝐞'𝐬 𝐲𝐨𝐮𝐫 𝐫𝐚𝐧𝐝𝐨𝐦 𝐦𝐞𝐦𝐞",
+        attachment: stream.data
+      }, event.threadID, event.messageID);
 
- } catch (error) {
- return message.reply("⚠️ Failed to fetch meme:\n" + error.message);
- }
- }
+      return;
+    } catch (error) {
+      return message.reply("An error occurred while fetching meme.");
+    }
+  }
 };

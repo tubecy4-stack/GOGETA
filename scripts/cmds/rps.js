@@ -1,65 +1,72 @@
 module.exports = {
- config: {
- name: "rps",
- version: "1.0",
- author: "Chitron Bhattacharjee",
- shortDescription: "Play rock-paper-scissors game with the bot.",
- category: "𝗙𝗨𝗡 & 𝗚𝗔𝗠𝗘",
- guide: "{prefix}rps <rock|paper|scissors>"
- },
- onStart: async function ({ message, args }) {
- const choices = ["rock", "paper", "scissors"];
- const userChoice = args[0];
- if (!userChoice || !choices.includes(userChoice.toLowerCase())) {
- return message.reply("Please choose either rock, paper or scissors!");
- }
+  config: {
+    name: "rps",
+    version: "2.0",
+    author: "Saim x ChatGPT",
+    countDown: 3,
+    role: 0,
+    shortDescription: { en: "Rock Paper Scissors, GOAT Edition" },
+    longDescription: { en: "Play RPS with ultimate style and savage comebacks" },
+    category: "game",
+    guide: { en: "{pn} rock/paper/scissors" }
+  },
 
- const botChoice = choices[Math.floor(Math.random() * choices.length)];
+  onStart: async function ({ message, args }) {
+    const userChoice = args[0]?.toLowerCase();
+    const choices = ["rock", "paper", "scissors"];
+    if (!choices.includes(userChoice)) {
+      return message.reply("❌ Use like: `rps rock` | `rps paper` | `rps scissors`");
+    }
 
- message.reply(`You chose ${userChoice}. I chose ${botChoice}.`);
+    const botChoice = choices[Math.floor(Math.random() * choices.length)];
+    let resultText = "";
+    let savageLine = "";
 
- if (userChoice.toLowerCase() === botChoice) {
- message.reply("It's a tie!");
- } else if (
- (userChoice.toLowerCase() === "rock" && botChoice === "scissors") ||
- (userChoice.toLowerCase() === "paper" && botChoice === "rock") ||
- (userChoice.toLowerCase() === "scissors" && botChoice === "paper")
- ) {
- message.reply("Congratulations! You won!");
- } else {
- message.reply("I win! Better luck next time!");
- }
- },
-};module.exports = {
- config: {
- name: "rps",
- version: "1.0",
- author: "Your name",
- shortDescription: "Play rock-paper-scissors game with the bot using emoji.",
- category: "fun",
- guide: "{prefix}rps <✊|✋|✌️>"
- },
- onStart: async function ({ message, args }) {
- const choices = ["✊", "✋", "✌️"];
- const userChoice = args[0];
- if (!userChoice || !choices.includes(userChoice)) {
- return message.reply("Please choose either ✊, ✋, or ✌️!");
- }
+    const savageWins = [
+      "🔥 You just slapped the bot like Will Smith!",
+      "⚡ You outplayed the bot like a true legend!",
+      "GOAT spotted. Bot can’t handle your energy!",
+      "Bot: *I need a moment to cry...*"
+    ];
 
- const botChoice = choices[Math.floor(Math.random() * choices.length)];
+    const savageLoses = [
+      "🤖 Bot just destroyed your dreams!",
+      "Haha! That was cute. Try again, loser.",
+      "Your hands are as slow as 2G internet.",
+      "Bot: *Another victim down.*"
+    ];
 
- message.reply(`You chose ${userChoice}. I chose ${botChoice}.`);
+    const savageDraws = [
+      "Great minds think alike. Too bad you're not one.",
+      "Draw! But bot still cooler though.",
+      "Even when it’s a tie, bot still flexin'."
+    ];
 
- if (userChoice === botChoice) {
- message.reply("It's a tie! ⚖️");
- } else if (
- (userChoice === "✊" && botChoice === "✌️") ||
- (userChoice === "✋" && botChoice === "✊") ||
- (userChoice === "✌️" && botChoice === "✋")
- ) {
- message.reply("╔════ஜ۩۞۩ஜ════╗\n\nCongratulations! You won! 🎉\n\n╚════ஜ۩۞۩ஜ════╝");
- } else {
- message.reply("╔════ஜ۩۞۩ஜ═══╗\n\nI win! Better luck next time! 😎\n\n╚════ஜ۩۞۩ஜ═══╝");
- }
- },
+    if (userChoice === botChoice) {
+      resultText = "🤝 It's a draw!";
+      savageLine = savageDraws[Math.floor(Math.random() * savageDraws.length)];
+    } else if (
+      (userChoice === "rock" && botChoice === "scissors") ||
+      (userChoice === "paper" && botChoice === "rock") ||
+      (userChoice === "scissors" && botChoice === "paper")
+    ) {
+      resultText = "✅ You win!";
+      savageLine = savageWins[Math.floor(Math.random() * savageWins.length)];
+    } else {
+      resultText = "❌ Bot wins!";
+      savageLine = savageLoses[Math.floor(Math.random() * savageLoses.length)];
+    }
+
+    const messageBody = `
+🎮 *R O C K — P A P E R — S C I S S O R S* 🎮
+
+👤 You: ${userChoice.toUpperCase()}
+🤖 Bot: ${botChoice.toUpperCase()}
+
+🏆 ${resultText}
+${savageLine}
+`;
+
+    message.reply(messageBody);
+  }
 };

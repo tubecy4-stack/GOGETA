@@ -1,51 +1,65 @@
-const axios = require("axios");
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const axios = require('axios');
 
-module.exports = {
-  config: {
-    name: "gist",
-    aliases: ["gistup"],
-    version: "1.0",
-    author: "NeoKEX", 
-    countDown: 5,
-    role: 2,
-    shortDescription: "Gist a command's code.",
-    longDescription: "Uploads the raw source code of any command to a Gist service and returns the raw link.",
-    category: "utility",
-    guide: "{pn} <commandName>"
-  },
+const baseApiUrl = async () => {
+  const base = await axios.get('https://raw.githubusercontent.com/Saim12678/Saim/main/baseApiUrl.json');
+  return base.data.api;
+};
 
-  onStart: async function ({ api, event, args, message }) {
-    const cmdName = args[0];
-    if (!cmdName) {
-      return message.reply("❌ | Please provide the command name to Gist.");
-    }
+module.exports.config = {
+  name: "gist",
+  version: "2.0",
+  role: 2,
+  author: "Ew’r Saim",
+  usePrefix: true,
+  description: "Create a Gist from reply or file",
+  category: "convert",
+  guide: { en: "[filename] or reply only" },
+  countDown: 1
+};
 
-    const cmdPath = path.join(__dirname, `${cmdName}.js`);
+module.exports.onStart = async function ({ api, event, args }) {
+  const admin = ["61573725567297", "61553564375586"];
+  if (!admin.includes(event.senderID)) {
+    return api.sendMessage("⚠ | Sorry bro eta shudu saim vai use korte parbe.", event.threadID, event.messageID);
+  }
 
-    if (!fs.existsSync(cmdPath)) {
-      return message.reply(`❌ | Command "${cmdName}" not found in this folder.`);
-    }
+  const inputFileName = args[0];
+  let code = '';
+  let fileName = inputFileName;
 
-    try {
-      const code = fs.readFileSync(cmdPath, "utf8");
-      
-      const apiUrl = 'https://neokex-apis.onrender.com/gist';
+  try {
+    if (event.type === "message_reply" && event.messageReply.body) {
+      code = event.messageReply.body;
 
-      const response = await axios.post(apiUrl, {
-        code: code
-      });
-
-      const { status, raw_url } = response.data;
-      if (status === "success" && raw_url) {
-        return message.reply(`🔗 Raw URL: ${raw_url}`);
-      } else {
-        return message.reply(`❌ | Failed to upload code to Gist.`);
+      if (!fileName) {
+        const time = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+        fileName = `gist_${time}`;
       }
-    } catch (error) {
-      console.error(error);
-      return message.reply("❌ | An error occurred while reading or Gisting the command file.");
+    } else if (inputFileName) {
+      const filePath = `scripts/cmds/${inputFileName}.js`;
+      code = await fs.promises.readFile(filePath, 'utf-8');
+      fileName = inputFileName;
+    } else {
+      return api.sendMessage("⚠ | Please reply to a code or provide a file name.", event.threadID, event.messageID);
     }
+
+    const encoded = encodeURIComponent(code);
+    const apiUrl = await baseApiUrl();
+
+    const response = await axios.post(`${apiUrl}/gist`, {
+      code: encoded,
+      nam: fileName.endsWith(".js") ? fileName : `${fileName}.js`
+    });
+
+    const link = response.data?.data;
+
+    if (!link) throw new Error("Invalid response");
+
+    api.sendMessage(`${link}`, event.threadID, event.messageID);
+
+  } catch (err) {
+    console.error("❌ Gist Error:", err.message || err);
+    api.sendMessage("⚠️ Failed to create gist. File not found or server issue.", event.threadID, event.messageID);
   }
 };

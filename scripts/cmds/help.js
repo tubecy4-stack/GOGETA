@@ -1,145 +1,173 @@
-const fs = require("fs-extra");
-const axios = require("axios");
-const path = require("path");
-const { getPrefix } = global.utils;
-const { commands, aliases } = global.GoatBot;
-
 module.exports = {
   config: {
     name: "help",
-    version: "1.18",
-    author: "ShAn", 
-    countDown: 5,
-    role: 0,
-    shortDescription: {
-      en: "View command usage",
-    },
-    longDescription: {
-      en: "View command usage and list all commands or commands by category",
-    },
-    category: "info",
-    guide: {
-      en: "{pn} / help cmdName\n{pn} -c <categoryName>",
-    },
-    priority: 1,
+    aliases: ["menu", "commands"],
+    version: "5.0",
+    author: "GoatBot",
+    shortDescription: "Show all available commands",
+    longDescription: "Displays a beautiful categorized list of commands with modern design.",
+    category: "system",
+    guide: "{pn}help [command name]"
   },
 
-  onStart: async function ({ message, args, event, threadsData, role }) {
-    const { threadID } = event;
-    const threadData = await threadsData.get(threadID);
-    const prefix = getPrefix(threadID);
+  onStart: async function ({ message, args, prefix }) {
+    const allCommands = global.GoatBot.commands;
+    const categories = {};
 
-    if (args.length === 0) {
-      const categories = {};
-      let msg = "";
+    // Category mapping with proper names and emojis
+    const categoryMap = {
+      'box chat': 'BOX CHAT',
+      'system': 'SYSTEM',
+      'admin': 'ADMIN',
+      'general': 'GENERAL',
+      'image': 'IMAGE',
+      'media': 'MEDIA',
+      'game': 'GAME',
+      'economy': 'ECONOMY',
+      'tools': 'TOOLS',
+      'utility': 'UTILITY',
+      'fun': 'FUNNY',
+      'info': 'INFORMATION',
+      'config': 'CONFIG',
+      'ai': 'AI',
+      'love': 'LOVE',
+      'anime': 'ANIME',
+      'search': 'SEARCH',
+      'study': 'STUDY',
+      'health': 'HEALTH',
+      'nsfw': 'NSFW',
+      'edit-img': 'EDIT-IMG',
+      'no prefix': 'NO PREFIX'
+    };
 
-      msg += `╔══════════════╗\n🔹 COMMAND LIST 🔹\n╚══════════════╝\n`;
+    const cleanCategoryName = (text) => {
+      if (!text) return "general";
+      return text
+        .normalize("NFKD")
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    };
 
-      for (const [name, value] of commands) {
-        if (value.config.role > 1 && role < value.config.role) continue;
+    for (const [name, cmd] of allCommands) {
+      const cat = cleanCategoryName(cmd.config.category);
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push(cmd.config.name);
+    }
 
-        const category = value.config.category || "Uncategorized";
-        categories[category] = categories[category] || { commands: [] };
-        categories[category].commands.push(name);
-      }
+    // Single command detail
+    if (args[0]) {
+      const query = args[0].toLowerCase();
+      const cmd =
+        allCommands.get(query) ||
+        [...allCommands.values()].find((c) => (c.config.aliases || []).includes(query));
+      if (!cmd) return message.reply(`❌ Command "${query}" not found.`);
 
-      Object.keys(categories).forEach((category) => {
-        if (category !== "info") {
-          msg += `\n╭────────────⭓\n│『 ${category.toUpperCase()} 』`;
+      const {
+        name,
+        version,
+        author,
+        guide,
+        category,
+        shortDescription,
+        longDescription,
+        aliases
+      } = cmd.config;
 
-          const names = categories[category].commands.sort();
-          names.forEach((item) => {
-            msg += `\n│💠${item}💠`;
-          });
+      const desc =
+        typeof longDescription === "string"
+          ? longDescription
+          : longDescription?.en || shortDescription?.en || shortDescription || "No description";
 
-          msg += `\n╰────────⭓`;
-        }
-      });
+      const usage =
+        typeof guide === "string"
+          ? guide.replace(/{pn}/g, prefix)
+          : guide?.en?.replace(/{pn}/g, prefix) || `${prefix}${name}`;
 
-      const totalCommands = commands.size;
-      msg += `\n𝗖𝘂𝗿𝗿𝗲𝗻𝘁𝗹𝘆, 𝘁𝗵𝗲 𝗯𝗼𝘁 𝗵𝗮𝘀 ${totalCommands} 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀 𝘁𝗵𝗮𝘁 𝗰𝗮𝗻 𝗯𝗲 𝘂𝘀𝗲𝗱\n`;
-      msg += `\n𝗧𝘆𝗽𝗲 ${prefix}𝗵𝗲𝗹𝗽 𝗰𝗺𝗱𝗡𝗮𝗺𝗲 𝘁𝗼 𝘃𝗶𝗲𝘄 𝘁𝗵𝗲 𝗱𝗲𝘁𝗮𝗶𝗹𝘀 𝗼𝗳 𝘁𝗵𝗮𝘁 𝗰𝗼𝗺𝗺𝗮𝗻𝗱\n`;
-      msg += `\n🫧𝘽𝙊𝙏 𝙉𝘼𝙈𝙀🫧: ♡𝕮𝖍𝖔𝖈𝖔𝖑𝖆𝖙𝖊 𝕼𝖚𝖊𝖊𝖓♡`;
-      msg += `\n🔹 𝘽𝙊𝙏 𝙊𝙒𝙉𝙀𝙍 🔹`;
-      msg += `\n 	 					`;
-      msg += `\n~𝙉𝘼𝙈𝙀:✰ '𝗘𝘄'𝗿 𝗦𝗵𝗔𝗻'𝘀 ✰`;
-      msg += `\n~𝙁𝘽: m.me/Sh4n.Dev1`;
-
-      await message.reply({
-        body: msg,
-      });
-    } else if (args[0] === "-c") {
-      if (!args[1]) {
-        await message.reply("Please specify a category name.");
-        return;
-      }
-
-      const categoryName = args[1].toLowerCase();
-      const filteredCommands = Array.from(commands.values()).filter(
-        (cmd) => cmd.config.category?.toLowerCase() === categoryName
+      return message.reply(
+        `╭── NAME ────⭓\n│ ${name}\n├── INFO\n│ Description: ${desc}\n│ Other names: ${aliases?.length ? aliases.join(", ") : "None"}\n│ Version: ${version || "1.0"}\n│ Role: ${category || "Uncategorized"}\n│ Author: ${author || "Unknown"}\n├── Usage\n${usage}\n├── Notes\n│ The content inside <XXXXX> can be changed\n│ The content inside [a|b|c] is a or b or c\n╰──────⭔`
       );
+    }
 
-      if (filteredCommands.length === 0) {
-        await message.reply(`No commands found in the category "${categoryName}".`);
-        return;
+    // Small-caps stylizer (best-effort for Latin letters)
+    const smallCapsMap = {
+      a: 'ᴀ', b: 'ʙ', c: 'ᴄ', d: 'ᴅ', e: 'ᴇ', f: 'ꜰ', g: 'ɢ', h: 'ʜ', i: 'ɪ', j: 'ᴊ',
+      k: 'ᴋ', l: 'ʟ', m: 'ᴍ', n: 'ɴ', o: 'ᴏ', p: 'ᴘ', q: 'ǫ', r: 'ʀ', s: 'ꜱ', t: 'ᴛ',
+      u: 'ᴜ', v: 'ᴠ', w: 'ᴡ', x: 'x', y: 'ʏ', z: 'ᴢ'
+    };
+    const toSmallCaps = (text) =>
+      (text || '')
+        .toLowerCase()
+        .split('')
+        .map(ch => smallCapsMap[ch] || ch)
+        .join('');
+
+    // Format commands in rows of 3 (keep original layout), but stylize names
+    const formatCommands = (cmds) => {
+      const sorted = cmds.sort();
+      const rows = [];
+      for (let i = 0; i < sorted.length; i += 3) {
+        const row = sorted.slice(i, i + 3);
+        const formattedRow = row.map(cmd => `✧${toSmallCaps(cmd)}`).join(' ');
+        rows.push(`│${formattedRow}`);
       }
+      return rows.join('\n');
+    };
 
-      let msg = `╔══════════════╗\n🔹 ${categoryName.toUpperCase()} COMMANDS 🔹\n╚══════════════╝\n`;
+    // Main command list with original formatting
+    let msg = '';
 
-      filteredCommands.forEach((cmd) => {
-        msg += `\n💠 ${cmd.config.name} 💠`;
-      });
+    // Original category order and their display names
+    const categoryOrder = [
+      { key: 'image', name: 'IMAGE' },
+      { key: 'ai', name: 'AI' },
+      { key: 'general', name: 'GENERAL' },
+      { key: 'image', name: 'IMAGE GEN' },
+      { key: 'game', name: 'GAME' },
+      { key: 'admin', name: 'ADMIN' },
+      { key: 'box chat', name: 'BOX CHAT' },
+      { key: 'fun', name: 'FUNNY' },
+      { key: 'utility', name: 'UTILITY' },
+      { key: 'media', name: 'MEDIA' },
+      { key: 'anime', name: 'ANIME' },
+      { key: 'economy', name: 'ECONOMY' },
+      { key: 'love', name: 'LOVE' },
+      { key: 'tools', name: 'TOOLS' },
+      { key: 'system', name: 'SYSTEM' },
+      { key: 'study', name: 'STUDY' },
+      { key: 'search', name: 'SEARCH' },
+      { key: 'nsfw', name: 'NSFW' },
+      { key: 'edit-img', name: 'EDIT-IMG' },
+      { key: 'no prefix', name: 'NO PREFIX' },
+      { key: 'health', name: 'HEALTH' },
+      { key: 'info', name: 'INFORMATION' },
+      { key: 'config', name: 'CONFIG' }
+    ];
 
-      await message.reply(msg);
-    } else {
-      const commandName = args[0].toLowerCase();
-      const command = commands.get(commandName) || commands.get(aliases.get(commandName));
+    // Build the message (keep original headers/footers)
+    for (const categoryInfo of categoryOrder) {
+      const categoryKey = categoryInfo.key;
+      const categoryName = categoryInfo.name;
 
-      if (!command) {
-        await message.reply(`Command "${commandName}" not found.`);
-      } else {
-        const configCommand = command.config;
-        const roleText = roleTextToString(configCommand.role);
-        const author = configCommand.author || "Unknown";
-
-        const longDescription = configCommand.longDescription
-          ? configCommand.longDescription.en || "No description"
-          : "No description";
-
-        const guideBody = configCommand.guide?.en || "No guide available.";
-        const usage = guideBody.replace(/{p}/g, prefix).replace(/{n}/g, configCommand.name);
-
-        const response = `╭── NAME ────⭓\n` +
-          `│ ${configCommand.name}\n` +
-          `├── INFO\n` +
-          `│ Description: ${longDescription}\n` +
-          `│ Other names: ${configCommand.aliases ? configCommand.aliases.join(", ") : "Do not have"}\n` +
-          `│ Version: ${configCommand.version || "1.0"}\n` +
-          `│ Role: ${roleText}\n` +
-          `│ Time per command: ${configCommand.countDown || 1}s\n` +
-          `│ Author: ${author}\n` +
-          `├── Usage\n` +
-          `│ ${usage}\n` +
-          `├── Notes\n` +
-          `│ The content inside <ShAn> can be changed\n` +
-          `│ The content inside [a|b|c] is a or b or c\n` +
-          `╰━━━━━━━❖`;
-
-        await message.reply(response);
+      if (categories[categoryKey] && categories[categoryKey].length > 0) {
+        msg += `╭─────⭓ ${categoryName} 📁\n`;
+        msg += formatCommands(categories[categoryKey]);
+        msg += `\n╰────────────⭓\n\n`;
       }
     }
-  },
-};
 
-function roleTextToString(roleText) {
-  switch (roleText) {
-    case 0:
-      return "0 (All users)";
-    case 1:
-      return "1 (Group administrators)";
-    case 2:
-      return "2 (Admin bot)";
-    default:
-      return "Unknown role";
+    // Add footer with previous style format
+    const totalCommands = allCommands.size;
+    const userName = message.senderID || 'user';
+
+    msg += `╭━━━━ [ 𝐒𝐇𝐈𝐙𝐔𝐊𝐀-𝐁𝐎𝐓🐥 ] ━━━╮\n`;
+    msg += `┃🍎 𝐌ʏ 𝐍ᴀᴍᴇ: 🎀 𝐒ʜɪᴢᴜᴋᴀ 𝐁ᴀʙᴇ\n`;
+    msg += `┃🍎 𝐌ʏ 𝐎ᴡɴᴇʀ: 𝐙ɪsᴀɴ🐢\n`;
+    msg += `┃🍎 𝐅ᴀᴄᴇʙᴏᴏᴋ: https://www.facebook.com/dekisuki.hidetoshi.2025\n`;
+    msg += `╰━━━━━━━━━━━━━━━━╯\n\n`;
+    msg += `⭔Type ${prefix}help <command> to learn usage.`;
+
+    return message.reply(msg);
   }
-    }
+};

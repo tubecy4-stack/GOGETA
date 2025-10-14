@@ -1,70 +1,103 @@
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+
 module.exports = {
- config: {
- name: "gif",
- version: "1.0",
- author: "Chitron Bhattacharjee",
- countDown: 10,
- role: 0,
- shortDescription: {
- en: "Search for GIFs"
- },
- longDescription: {
- en: "Search and send random GIFs based on keywords"
- },
- category: "fun",
- guide: {
- en: "{pn} [keyword] - Example: {pn} hugging"
- }
- },
+  config: {
+    name: "gif",
+    version: "2.1",
+    author: "Ew'r Saim",
+    category: "media",
+    role: 0,
+    guide: {
+      en: {
+        description: "Search or get trending GIFs from Giphy",
+        usage: "{pn} <search> [count] | trending [count]",
+        example: "{pn} cat 3\n{pn} trending 5"
+      }
+    }
+  },
 
- langs: {
- en: {
- searching: "╔═══❖•°•°•°❖═══╗\n 𝐒𝐡𝐢𝐏𝐮 𝐀𝐢 ✨\n 🔎 %1 gif\n╚═══❖•°•°•°❖═══╝"
- }
- },
+  onStart: async function ({ api, event, args }) {
+    const { threadID, messageID } = event;
 
- onStart: async function ({ api, event, args, message, getLang }) {
- const axios = require('axios');
- const keyword = args.join(" ");
- 
- if (!keyword) {
- return message.reply("Please enter a keyword to search for GIFs. Example: +gif hugging");
- }
+    const cacheDir = path.join(__dirname, 'cache');
+    if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
 
- try {
- // Show searching message
- message.reply(getLang("searching", keyword));
- 
- // Search for GIFs using Giphy API
- const response = await axios.get(`https://api.giphy.com/v1/gifs/search`, {
- params: {
- api_key: 'wBUEVK7mbqAaiCBRrYKYyEMMqZ1sPujI',
- q: keyword,
- limit: 25,
- offset: 0,
- rating: 'g',
- lang: 'en',
- bundle: 'messaging_non_clips'
- }
- });
+    if (args.length === 0) {
+      return api.sendMessage('❌ Please provide a search query or type "trending".', threadID, messageID);
+    }
 
- const gifs = response.data.data;
- 
- if (gifs.length === 0) {
- return message.reply(`No GIFs found for "${keyword}"`);
- }
+    let isTrending = false;
+    let query = args[0];
+    let count = 1;
 
- // Select a random GIF from the results
- const randomGif = gifs[Math.floor(Math.random() * gifs.length)];
- const gifUrl = randomGif.images.original.url;
+    // trending mode
+    if (query.toLowerCase() === "trending") {
+      isTrending = true;
+      count = parseInt(args[1]) || 5;
+    } else {
+      const lastArg = args[args.length - 1];
+      if (!isNaN(lastArg)) {
+        count = parseInt(lastArg);
+        args.pop();
+      }
+      query = args.join(" ");
+    }
 
- // Send the GIF as an attachment
- return message.reply({
- attachment: await global.utils.getStreamFromURL(gifUrl)
- });
- } catch (error) {
- console.error(error);
- return message.reply("Sorry, an error occurred while searching for GIFs.");
- }
- }
+    const apiKey = 'QHv1qVaxy4LS3AmaNuUYNT9zr40ReFBI';
+
+    try {
+      const url = isTrending
+        ? `https://api.giphy.com/v1/gifs/trending?api_key=${apiKey}&limit=${count}&rating=g`
+        : `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(query)}&limit=${count}&rating=g`;
+
+      const res = await axios.get(url);
+      const data = res.data.data;
+
+      if (!data || data.length === 0) {
+        return api.sendMessage("😕 No GIFs found for your request.", threadID, messageID);
+      }
+
+      const attachments = [];
+
+      for (let i = 0; i < data.length; i++) {
+        const gifURL = data[i].images.original.url;
+        const filePath = path.join(cacheDir, `giphy_${i}.gif`);
+        const gifRes = await axios.get(gifURL, { responseType: "arraybuffer" });
+        fs.writeFileSync(filePath, Buffer.from(gifRes.data, "binary"));
+        attachments.push(fs.createReadStream(filePath));
+      }
+
+      const captions = [
+        "Here's something cool! 😎",
+        "Enjoy! 🎉",
+        "Found these just for you 😉",
+        "GIFs make life better 🤖",
+        "Hope this brings a smile 😊",
+        "Boom! Instant mood boost 💥",
+        "GIFs are life, aren't they? 😁"
+      ];
+      const randomCaption = captions[Math.floor(Math.random() * captions.length)];
+
+      await api.sendMessage({
+        body: isTrending
+          ? `${randomCaption}\n\n🔥 Trending GIFs (${data.length}):`
+          : `${randomCaption}\n\n🎬 Here are ${data.length} result(s) for **"${query}"** 🔍`,
+        attachment: attachments
+      }, threadID);
+
+      // Clean up files
+      setTimeout(() => {
+        attachments.forEach((_, i) => {
+          const file = path.join(cacheDir, `giphy_${i}.gif`);
+          if (fs.existsSync(file)) fs.unlinkSync(file);
+        });
+      }, 60 * 1000);
+
+    } catch (error) {
+      console.error("Giphy Error:", error);
+      api.sendMessage("❌ Error fetching GIFs. Try again later.", threadID, messageID);
+    }
+  }
 };

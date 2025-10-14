@@ -22,14 +22,14 @@ module.exports = {
 	config: {
 		name: "rank",
 		version: "1.7",
-		author: "Chitron Bhattacharjee",
+		author: "NTKhang",
 		countDown: 5,
 		role: 0,
 		description: {
 			vi: "Xem level của bạn hoặc người được tag. Có thể tag nhiều người",
 			en: "View your level or the level of the tagged person. You can tag many people"
 		},
-		category: "𝗙𝗨𝗡 & 𝗚𝗔𝗠𝗘",
+		category: "rank",
 		guide: {
 			vi: "   {pn} [để trống | @tags]",
 			en: "   {pn} [empty | @tags]"

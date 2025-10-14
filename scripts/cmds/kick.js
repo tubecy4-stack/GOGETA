@@ -2,14 +2,14 @@ module.exports = {
 	config: {
 		name: "kick",
 		version: "1.3",
-		author: "Chitron Bhattacharjee",
+		author: "NTKhang",
 		countDown: 5,
 		role: 1,
 		description: {
 			vi: "Kick thành viên khỏi box chat",
 			en: "Kick member out of chat box"
 		},
-		category: "𝗕𝗢𝗫",
+		category: "box chat",
 		guide: {
 			vi: "   {pn} @tags: dùng để kick những người được tag",
 			en: "   {pn} @tags: use to kick members who are tagged"
