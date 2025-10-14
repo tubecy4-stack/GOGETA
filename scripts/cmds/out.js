@@ -1,19 +1,27 @@
-module.exports.config = {
-  name: "leave",
-  version: "1.0.0",
-  hasPermssion: 2,
-  credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-  description: "out box",
-  commandCategory: "Admin",
-  usages: "out [tid]",
-  cooldowns: 3
-};
+module.exports = {
+	config: {
+		name: "out",
+		version: "1.0",
+		author: "XyryllPanget",
+		countDown: 5,
+		role: 2,
+		shortDescription: {
+			vi: "",
+			en: "kick 🦶 bot from gc by owner bot"
+		},
+		longDescription: {
+			vi: "",
+			en: "remove bot from group "
+		},
+		category: "owner",
+		guide: {
+			vi: "",
+			en: "just write غادر"
+		}
+ },
+	onStart: async function ({ api, args, message, event }) {
 
-module.exports.run = async function({ api, event, args }) {
-    const tid = args.join(" ")
-   let namee = await api.getThreadInfo(tid)
-  if (!tid) return api.removeUserFromGroup(api.getCurrentUserID(), event.threadID);
-
-else return api.removeUserFromGroup(api.getCurrentUserID(), tid, () => api.sendMessage("The bot has left this group", event.threadID, event.messageID));
-
+			if (!args[0]) return api.removeUserFromGroup(api.getCurrentUserID(), event.threadID);
+				if (!isNaN(args[0])) return api.removeUserFromGroup(api.getCurrentUserID(), args.join(" "));
+	}
 }

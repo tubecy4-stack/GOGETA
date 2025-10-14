@@ -1,107 +1,215 @@
-module.exports.config = {
-  name: "top",
-  version: "0.0.5",
-  hasPermssion: 0,
-  credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-  description: "Top Server!",
-  commandCategory: "group",
-  usages: "[thread/user/money/level]",
-  cooldowns: 5
+module.exports = {
+
+  config: {
+
+    name: "top",
+
+    version: "1.1",
+
+    author: "Shikaki",
+
+    category: "economy",
+
+    shortDescription: {
+
+      vi: "Xem 10 người giàu nhất",
+
+      en: "View the top 10 richest people",
+
+    },
+
+    longDescription: {
+
+      vi: "Xem danh sách 10 người giàu nhất trong nhóm",
+
+      en: "View the list of the top 10 richest people in the group",
+
+    },
+
+    guide: {
+
+      en: "{pn} 1\n{pn} 50\n{pn} 100",
+
+    },
+
+    role: 0,
+
+  },
+
+
+
+  onStart: async function ({ message, usersData, args, api }) {
+
+    // Get all users' data
+
+    const allUserData = await usersData.getAll();
+
+
+
+    // Filter out users with invalid money values and sort by money in descending order
+
+    const sortedUsers = allUserData
+
+      .filter((user) => !isNaN(user.money))
+
+      .sort((a, b) => b.money - a.money);
+
+
+
+    let msg = "----------Top Richest People-----------\n";
+
+
+
+    if (args[0] === "top") {
+
+      // Display the richest person
+
+      if (sortedUsers.length > 0) {
+
+        const richestUser = sortedUsers[0];
+
+        const formattedBalance = formatNumberWithFullForm(richestUser.money);
+
+        msg += `1. ${richestUser.name} | $ ${formattedBalance}\n`;
+
+      } else {
+
+        msg += "No users found.\n";
+
+      }
+
+    } else {
+
+      // Default: Display the top 10 richest people
+
+      const topCount = Math.min(parseInt(args[0]) || 10, sortedUsers.length);
+
+      sortedUsers.slice(0, topCount).forEach((user, index) => {
+
+        const formattedBalance = formatNumberWithFullForm(user.money);
+
+        msg += `${index + 1}. ${user.name} | $ ${formattedBalance}\n`;
+
+      });
+
+    }
+
+
+
+    msg += "----------------------------------";
+
+
+
+    message.reply(msg);
+
+  },
+
 };
 
-module.exports.run = async ({ event, api, args, Currencies, Users }) => {
-    const { threadID, messageID } = event;
 
 
-  ///////////////////////////////////////////
-  //===== Check if there is a limit or not =====//
-  if (args[1] && isNaN(args[1]) || parseInt(args[1]) <= 0) return api.sendMessage("list length information must be a number and not less than 0", event.threadID, event.messageID);
-  var option = parseInt(args[1] || 10);
-  var data, msg = "";
+// Function to format a number with full forms (e.g., 1 Thousand, 133 Million, 76.2 Billion)
 
-  ///////////////////////////////////////
-  //===== Check the case =====//
-  var fs = require("fs-extra");
-  var request = require("request");  // Covernt exp to level
-    function expToLevel(point) {
-  if (point < 0) return 0;
-  return Math.floor((Math.sqrt(1 + (4 * point) / 3) + 1) / 2);
-    }
-    //level 
-    if (args[0] == "user") { 
-    let all = await Currencies.getAll(['userID', 'exp']);
-        all.sort((a, b) => b.exp - a.exp);
-        let num = 0;
-               let msg = {
-          body: 'The 10 People Highest Level On Server!',
-          
-        }
-        for (var i = 0; i < 10; i++) {
-           
-   
-          let level = expToLevel(all[i].exp);
-          var name = (await Users.getData(all[i].userID)).name;      
-  
-          num += 1;
-          msg.body += '\n' + num + '. ' + name + ' - level ' + level;}
-           console.log(msg.body)
-                    api.sendMessage(msg, event.threadID, event.messageID)
-    }
-  if (args[0] == "thread") {
-    var threadList = [];
-    
-    //////////////////////////////////////////////
-    //===== Get the entire group and message number =====//
-    try {
-          data = await api.getThreadList(option + 10, null, ["INBOX"]);
-    }
-    catch (e) {
-      console.log(e);
-    }
+function formatNumberWithFullForm(number) {
 
-    for (const thread of data) {
-      if (thread.isGroup == true) threadList.push({ threadName: thread.name, threadID: thread.threadID, messageCount: thread.messageCount });
-    }
-    
-    /////////////////////////////////////////////////////
-    //===== Sort from highest to lowest for each group =====//
-    threadList.sort((a, b) => {
-      if (a.messageCount > b.messageCount) return -1;
-            if (a.messageCount < b.messageCount) return 1;
-    })
+  const fullForms = [
 
-    ///////////////////////////////////////////////////////////////
-    //===== Start getting the push list into the return template =====//
-    var i = 0;
-    for(const dataThread of threadList) {
-      if (i == option) break;
-      msg += `${i+1}/ ${(dataThread.threadName)||"No name"}\nTID: [${dataThread.threadID}]\nNumber of message: ${dataThread.messageCount} message\n\n`;
-      i+=1;
-    }
-    
-    return api.sendMessage(`Top ${threadList.length} Groups Have The Most Number Of Message:\n_____________________________\n${msg}\n_____________________________`, threadID, messageID);
+    "",
+
+    "Thousand",
+
+    "Million",
+
+    "Billion",
+
+    "Trillion",
+
+    "Quadrillion",
+
+    "Quintillion",
+
+    "Sextillion",
+
+    "Septillion",
+
+    "Octillion",
+
+    "Nonillion",
+
+    "Decillion",
+
+    "Undecillion",
+
+    "Duodecillion",
+
+    "Tredecillion",
+
+    "Quattuordecillion",
+
+    "Quindecillion",
+
+    "Sexdecillion",
+
+    "Septendecillion",
+
+    "Octodecillion",
+
+    "Novemdecillion",
+
+    "Vigintillion",
+
+    "Unvigintillion",
+
+    "Duovigintillion",
+
+    "Tresvigintillion",
+
+    "Quattuorvigintillion",
+
+    "Quinvigintillion",
+
+    "Sesvigintillion",
+
+    "Septemvigintillion",
+
+    "Octovigintillion",
+
+    "Novemvigintillion",
+
+    "Trigintillion",
+
+    "Untrigintillion",
+
+    "Duotrigintillion",
+
+    "Googol",
+
+  ];
+
+
+
+  // Calculate the full form of the number (e.g., Thousand, Million, Billion)
+
+  let fullFormIndex = 0;
+
+  while (number >= 1000 && fullFormIndex < fullForms.length - 1) {
+
+    number /= 1000;
+
+    fullFormIndex++;
+
   }
-  
- if (args[0] == "money") { 
-    let all = await Currencies.getAll(['userID', 'money']);
-        all.sort((a, b) => b.money - a.money);
-        let num = 0;
-               let msg = {
-          body: 'The 10 People Richest On Server!',
-          
-        }
-        for (var i = 0; i < 10; i++) {
-        
-   
-          let level = all[i].money;
-      
-          var name = (await Users.getData(all[i].userID)).name;    
-                    
-          num += 1;
-          msg.body += '\n' + num + '. ' + name + ': ' + level + "💵";}
-                    console.log(msg.body)
-                    api.sendMessage(msg, event.threadID, event.messageID)
-    }
 
-}
 
+
+  // Format the number with two digits after the decimal point
+
+  const formattedNumber = number.toFixed(2);
+
+
+
+  // Add the full form to the formatted number
+
+  return `${formattedNumber} ${fullForms[fullFormIndex]}`;
+
+          }
