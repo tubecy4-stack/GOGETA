@@ -1,38 +1,57 @@
+const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
+
 module.exports = {
   config: {
     name: "drip",
-    aliases: [],
     version: "1.0",
-    author: "kshitiz",
-    shortDescription: "",
-    longDescription: "",
-    category: "fun",
-    guide: "{pn} @mention/reply"
+    author: "Chitron Bhattacharjee",
+    countDown: 10,
+    role: 0,
+    shortDescription: {
+      en: "Add drip effect to profile picture"
+    },
+    description: {
+      en: "Applies a cool drip effect to your or mentioned user's profile picture"
+    },
+    category: "image",
+    guide: {
+      en: "{p}drip [@mention or reply]\nIf no mention or reply, uses your profile picture."
+    }
   },
 
-  async onStart({ api, event, usersData }) {
+  onStart: async function ({ api, event, message }) {
+    const { senderID, mentions, type, messageReply } = event;
+
+    // Determine user ID for avatar
+    let uid;
+    if (Object.keys(mentions).length > 0) {
+      uid = Object.keys(mentions)[0];
+    } else if (type === "message_reply") {
+      uid = messageReply.senderID;
+    } else {
+      uid = senderID;
+    }
+
+    const avatarURL = `https://graph.facebook.com/${uid}/picture?width=512&height=512&access_token=350685531728|62f8ce9f74b12f84c123cc23437a4a32`;
+
     try {
-      let imageLink = "";
+      const res = await axios.get(`https://api.popcat.xyz/v2/drip?image=${encodeURIComponent(avatarURL)}`, {
+        responseType: "arraybuffer"
+      });
 
-      if (event.type === "message_reply" && event.messageReply) {
+      const filePath = path.join(__dirname, "cache", `drip_${uid}_${Date.now()}.png`);
+      fs.writeFileSync(filePath, res.data);
 
-        imageLink = await usersData.getAvatarUrl(event.messageReply.senderID);
-      } else {
-       avatar
-        imageLink = await usersData.getAvatarUrl(event.senderID);
-      }
+      message.reply({
+        body: "💧 Here's your drip effect image!",
+        attachment: fs.createReadStream(filePath)
+      }, () => fs.unlinkSync(filePath));
 
-      const gifURL = `https://api.popcat.xyz/drip?image=${encodeURIComponent(imageLink)}`;
-
-      const message = {
-        body: "you can't handle my richness🤑",
-        attachment: [await global.utils.getStreamFromURL(gifURL)]
-      };
-
-      api.sendMessage(message, event.threadID, event.messageID);
     } catch (err) {
       console.error(err);
-      api.sendMessage("Please mention or reply to someone", event.threadID, event.messageID);
+      message.reply("❌ | Failed to generate drip image.");
     }
   }
 };

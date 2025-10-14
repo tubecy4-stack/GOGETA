@@ -5,14 +5,14 @@ module.exports = {
 	config: {
 		name: "dhbc",
 		version: "1.3",
-		author: "NTKhang",
+		author: "Chitron Bhattacharjee",
 		countDown: 5,
 		role: 0,
 		description: {
 			vi: "chơi game đuổi hình bắt chữ",
 			en: "play game catch the word"
 		},
-		category: "game",
+		category: "𝗙𝗨𝗡 & 𝗚𝗔𝗠𝗘",
 		guide: {
 			en: "{pn}"
 		},

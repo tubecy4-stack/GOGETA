@@ -4,14 +4,14 @@ module.exports = {
  name: "dice",
  aliases: [],
  version: "1.0",
- author: "kshitiz",
+ author: "Chitron Bhattacharjee",
  countDown: 5,
  role: 0,
  shortDescription: "have fun",
  longDescription: {
  en: " ",
  },
- category: "game",
+ category: "𝗙𝗨𝗡 & 𝗚𝗔𝗠𝗘",
  guide: {
  en: "",
  },

@@ -1,129 +1,61 @@
-const axios = require("axios");
-const availableCmdsUrl = "https://raw.githubusercontent.com/Blankid018/D1PT0/main/availableCmds.json";
-const cmdUrlsJson = "https://raw.githubusercontent.com/Blankid018/D1PT0/main/cmdUrls.json";
-const ITEMS_PER_PAGE = 10;
+module.exports = {
+ config: {
+ name: "cmdstore",
+ aliases: ["store", "market", "commandstore"],
+ version: "1.1",
+ author: "Chitron Bhattacharjee",
+ countDown: 5,
+ role: 0,
+ shortDescription: {
+ en: "Get ShiPu AI command store link"
+ },
+ description: {
+ en: "Anime-style links to ShiPu AI free commands"
+ },
+ category: "info",
+ guide: {
+ en: "{pn} or type 'cmdstore' in chat"
+ }
+ },
 
-module.exports.config = {
-  name: "cmdstore",
-  aliases: ["cs", "cmds"],
-  author: "Dipto",
-  role: 2,
-  version: "6.9",
-  description: {
-    en: "Commands Store of Dipto",
-  },
-  countDown: 3,
-  category: "goatbot",
-  guide: {
-    en: "{pn} [command name | single character | page number]",
-  },
-};
-module.exports.onStart = async function ({ api, event, args }) {
-  const query = args.join(" ").trim().toLowerCase();
-  try {
-    const response = await axios.get(availableCmdsUrl);
-    let cmds = response.data.cmdName;
-    let finalArray = cmds;
-    let page = 1;
+ onStart: async function ({ message }) {
+ const replies = [
+`🌸✨ 𝒮𝒽𝒾𝒫𝓊 𝒜𝐼 𝒞𝑜𝓂𝓂𝒶𝓃𝒹 𝒮𝓉𝑜𝓇𝑒 ✨🌸
 
-    if (query) {
-      if (!isNaN(query)) {
-        page = parseInt(query);
-      } else if (query.length === 1) {
-        finalArray = cmds.filter(cmd => cmd.cmd.startsWith(query));
-        if (finalArray.length === 0) {
-          return api.sendMessage(`❌ | No commands found starting with "${query}".`, event.threadID, event.messageID);
-        }
-      } else {
-        finalArray = cmds.filter(cmd => cmd.cmd.includes(query));
-        if (finalArray.length === 0) {
-          return api.sendMessage(`❌ | Command "${query}" not found.`, event.threadID, event.messageID);
-        }
-      }
-    }
+🛒 𝓥𝓲𝓼𝓲𝓽 𝓽𝓱𝓮 𝓶𝓪𝓰𝓲𝓬 𝓶𝓪𝓻𝓴𝓮𝓽: 
+💠 http://lume.cooo.in/
 
-    const totalPages = Math.ceil(finalArray.length / ITEMS_PER_PAGE);
-    if (page < 1 || page > totalPages) {
-      return api.sendMessage(
-        `❌ | Invalid page number. Please enter a number between 1 and ${totalPages}.`,
-        event.threadID,
-        event.messageID
-      );
-    }
+📜 𝓖𝓮𝓽 𝓪𝓵𝓵 𝓕𝓡𝓔𝓔 𝓬𝓸𝓶𝓶𝓪𝓷𝓭𝓼 𝓸𝓯 𝓢𝓱𝓲𝓟𝓾 𝓐𝓘 𝓫𝓸𝓽 💖`,
 
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const cmdsToShow = finalArray.slice(startIndex, endIndex);
-    let msg = `╭───✦ Cmd Store ✦───╮\n│ Page ${page} of ${totalPages} page(s)\n│ Total ${finalArray.length} commands\n`;
-    cmdsToShow.forEach((cmd, index) => {
-      msg += `│ ───✦ ${startIndex + index + 1}. ${cmd.cmd}\n│ AUTHOR: ${cmd.author}\n│ UPDATE: ${cmd.update || null}\n`;
-    });
-    msg += `╰─────────────⧕`;
+`🌸 𝗦𝗵𝗶𝗣𝘂 𝗔𝗜 𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗦𝘁𝗼𝗿𝗲 🌸
 
-    if (page < totalPages) {
-      msg += `\nType "${this.config.name} ${page + 1}" for more commands.`;
-    }
-    api.sendMessage(
-      msg,
-      event.threadID,
-      (error, info) => {
-global.GoatBot.onReply.set(info.messageID, {
-          commandName: this.config.name,
-          type: "reply",
-          messageID: info.messageID,
-          author: event.senderID,
-          cmdName: finalArray,
-          page: page
-        });
-      },
-      event.messageID
-    );
-    console.log(finalArray)
-  } catch (error) {
-    api.sendMessage(
-      "❌ | Failed to retrieve commands.",
-      event.threadID,
-      event.messageID
-    );
-  }
-};
+✨ 𝗙𝗿𝗲𝗲 𝗚𝗼𝗮𝘁𝗕𝗼𝘁 𝗰𝗼𝗺𝗺𝗮𝗻𝗱 𝗳𝗶𝗹𝗲𝘀, 𝗺𝗼𝗱𝘀 & 𝘁𝗼𝗼𝗹𝘀 
+🔗 𝗩𝗶𝘀𝗶𝘁: http://lume.cooo.in/
 
-module.exports.onReply = async function ({ api, event, Reply }) {
+💖 𝗡𝗼 𝗽𝗮𝘆𝗺𝗲𝗻𝘁, 𝗷𝘂𝘀𝘁 𝗺𝗮𝗴𝗶𝗰 & 𝗰𝗼𝗱𝗲! ✨`
+ ];
+ return message.reply(replies[Math.floor(Math.random() * replies.length)]);
+ },
 
-  if (Reply.author != event.senderID) {
-    return api.sendMessage("Who are you? 🐸", event.threadID, event.messageID);
-  }
-  const reply = parseInt(event.body);
-  const startIndex = (Reply.page - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
+ onChat: async function ({ message, event }) {
+ const triggerWords = ["cmdstore", "store", "market", "commandstore"];
+ if (triggerWords.includes(event.body?.toLowerCase())) {
+ const replies = [
+`🌸✨ 𝒮𝒽𝒾𝒫𝓊 𝒜𝐼 𝒞𝑜𝓂𝓂𝒶𝓃𝒹 𝒮𝓉𝑜𝓇𝑒 ✨🌸
 
-  if (isNaN(reply) || reply < startIndex + 1 || reply > endIndex) {
-    return api.sendMessage(
-      `❌ | Please reply with a number between ${startIndex + 1} and ${Math.min(endIndex, Reply.cmdName.length)}.`,
-      event.threadID,
-      event.messageID
-    );
-  }
-  try {
-  const cmdName = Reply.cmdName[reply - 1].cmd
-const  { status }  = Reply.cmdName[reply - 1]
-    const response = await axios.get(cmdUrlsJson);
-    const selectedCmdUrl = response.data[cmdName];
-    if (!selectedCmdUrl) {
-      return api.sendMessage(
-        "❌ | Command URL not found.",
-        event.threadID,
-        event.messageID
-      );
-    }
-    api.unsendMessage(Reply.messageID);
-    const msg = `╭───────⭓\n│ STATUS :${status || null}\n│ Command Url: ${selectedCmdUrl}\n╰─────────────⭓`;
-    api.sendMessage(msg, event.threadID, event.messageID);
-  } catch (error) {
-    api.sendMessage(
-      "❌ | Failed to retrieve the command URL.",
-      event.threadID,
-      event.messageID
-    );
-  }
+🛒 𝓥𝓲𝓼𝓲𝓽 𝓽𝓱𝓮 𝓶𝓪𝓰𝓲𝓬 𝓶𝓪𝓻𝓴𝓮𝓽: 
+💠 http://lume.cooo.in/
+
+📜 𝓖𝓮𝓽 𝓪𝓵𝓵 𝓕𝓡𝓔𝓔 𝓬𝓸𝓶𝓶𝓪𝓷𝓭𝓼 𝓸𝓯 𝓢𝓱𝓲𝓟𝓾 𝓐𝓘 𝓫𝓸𝓽 💖`,
+
+`🌸 𝗦𝗵𝗶𝗣𝘂 𝗔𝗜 𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗦𝘁𝗼𝗿𝗲 🌸
+
+✨ 𝗙𝗿𝗲𝗲 𝗚𝗼𝗮𝘁𝗕𝗼𝘁 𝗰𝗼𝗺𝗺𝗮𝗻𝗱 𝗳𝗶𝗹𝗲𝘀, 𝗺𝗼𝗱𝘀 & 𝘁𝗼𝗼𝗹𝘀 
+🔗 𝗩𝗶𝘀𝗶𝘁: http://lume.cooo.in/
+
+💖 𝗡𝗼 𝗽𝗮𝘆𝗺𝗲𝗻𝘁, 𝗷𝘂𝘀𝘁 𝗺𝗮𝗴𝗶𝗰 & 𝗰𝗼𝗱𝗲! ✨`
+ ];
+ return message.reply(replies[Math.floor(Math.random() * replies.length)]);
+ }
+ }
 };

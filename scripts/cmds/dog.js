@@ -1,27 +1,35 @@
-module.exports.config = {
-	name: "dog",
-	version: "1.0.1",
-	hasPermssion: 0,
-	credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-	description: "Xem Boss",
-	commandCategory: "Picture",
-	usages: "dog [Text]",
-	cooldowns: 1,
-	
-	};
-			
-module.exports.run = async ({ api, event }) => {
-	const axios = require('axios');
-	const request = require('request');
-	const fs = require("fs");
-	axios.get('https://nekos.life/api/v2/img/woof').then(res => {
-	let ext = res.data.url.substring(res.data.url.lastIndexOf(".") + 1);
-	
-	let callback = function () {
-					api.sendMessage({
-						attachment: fs.createReadStream(__dirname + `/cache/dog.${ext}`)
-					}, event.threadID, () => fs.unlinkSync(__dirname + `/cache/dog.${ext}`), event.messageID);
-				};
-				request(res.data.url).pipe(fs.createWriteStream(__dirname + `/cache/dog.${ext}`)).on("close", callback);
-			})
-    }
+const axios = require("axios");
+const https = require("https");
+const fs = require("fs-extra");
+const path = require("path");
+
+module.exports = {
+ config: {
+ name: "dog",
+ version: "1.0",
+ author: "Chitron Bhattacharjee",
+ countDown: 5,
+ role: 0,
+ shortDescription: { en: "random dog image" },
+ longDescription: { en: "Sends a random dog image" },
+ category: "fun",
+ guide: { en: "+dog" }
+ },
+
+ onStart: async function ({ message }) {
+ const res = await axios.get("https://dog.ceo/api/breeds/image/random");
+ const url = res.data.message;
+ const cachePath = path.join(__dirname, "cache/dog.jpg");
+
+ const file = fs.createWriteStream(cachePath);
+ https.get(url, (response) => {
+ response.pipe(file);
+ file.on("finish", () => {
+ message.reply({
+ body: "🐶 Here's a cute doggo!",
+ attachment: fs.createReadStream(cachePath)
+ });
+ });
+ });
+ }
+};

@@ -1,82 +1,100 @@
-const models = [
-  'DreamShaper',
-  'MBBXL_Ultimate',
-  'Mysterious',
-  'Copax_TimeLessXL',
-  'Pixel_Art_XL',
-  'ProtoVision_XL',
-  'SDXL_Niji',
-  'CounterfeitXL',
-  'DucHaiten_AIart_SDXL'
-];
+const fs = require("fs");
+const path = require("path");
+const axios = require("axios");
 
 module.exports = {
-  config: {
-    name: "gen",
-    version: "1.0",
-    author: "RedWan×MAHI×Sanam",
-    countDown: 5,
-    role: 0,
-    longDescription: {
-      vi: "",
-      en: "Get images from text.",
-    },
-    category: "Image~Create",
-    guide: {
-      vi: "",
-      en: "Type {pn} with your prompts | (model name)\nHere are the Supported models:\n" + models.map((item, index) => `${index + 1}. ${item}`).join('\n'),
-    },
-  },
+ config: {
+ name: "gen",
+ aliases: [],
+ author: "Chitron Bhattacharjee",
+ version: "1.1",
+ cooldowns: 20,
+ role: 0,
+ shortDescription: "Generate an image based on a prompt.",
+ longDescription: "Generates an image using the provided prompt.",
+ category: "𝗔𝗜 & 𝗚𝗣𝗧",
+ guide: "{p}gen <prompt>",
+ },
 
-  onStart: async function ({ api, args, message, event }) {
-    try {
-      const text = args.join(" ");
-      if (!text) {
-        return message.reply("Please provide a prompt.");
-      }
+ onStart: async function ({ message, args, api, event, usersData }) {
+ const prompt = args.join(" ");
+ const cost = 5;
 
-      let prompt, model;
-      if (text.includes("|")) {
-        const [promptText, modelText] = text.split("|").map((str) => str.trim());
-        prompt = promptText;
-        model = modelText;
+ if (!prompt) {
+ return api.sendMessage("🦆 | Provide a prompt!\nExample: +gen A robot in Tokyo", event.threadID);
+ }
 
-        const modelNumber = parseInt(model);
-        if (modelNumber >= 1 && modelNumber <= 9) {
-          const modelNames = [
-            'DreamShaper',
-            'MBBXL_Ultimate',
-            'Mysterious',
-            'Copax_TimeLessXL',
-            'Pixel_Art_XL',
-            'ProtoVision_XL',
-            'SDXL_Niji',
-            'CounterfeitXL',
-            'DucHaiten_AIart_SDXL'
-          ];
-          model = modelNames[modelNumber - 1];
-        } else {
-          return message.reply("Invalid model number. Supported models are:\n" + models.map((item, index) => `${index + 1}. ${item}`).join('\n'));
-        }
-      } else {
-        prompt = text;
-        model = "DreamShaper";
-      }
+ const userData = await usersData.get(event.senderID);
+ const current = userData.money || 0;
 
-      let id;
-      api.setMessageReaction("⏳", event.messageID, () => {}, true);
-      const waitingMessage = await message.reply("✅ | Creating your Imagination...");
+ if (current < cost) {
+ return message.reply(`❌ | You need at least ${cost} coins.\n💰 Your balance: ${current}`);
+ }
 
-      const API = `https://www.api.vyturex.com/curios?prompt=${encodeURIComponent(prompt)}&modelType=${model}`;
-      const imageStream = await global.utils.getStreamFromURL(API);
+ await usersData.set(event.senderID, { money: current - cost });
 
-      await message.reply({
-        attachment: imageStream,
-      });
-      api.setMessageReaction("✅", event.messageID, () => {}, true);
-      await api.unsendMessage(waitingMessage.messageID);
-    } catch (error) {
-      message.reply("Your prompt is blocked. Try again later with another prompt. [ Tor Mayre Chudi REDWAN/ MAHI  Othoba Sanam Er Permission Nicos? ]");
-    }
-  },
+ message.reply("🌸 𝓣𝓱𝓲𝓼 𝓬𝓸𝓼𝓽 5 𝓬𝓸𝓲𝓷𝓼~\n🎨 𝓖𝓮𝓷𝓮𝓻𝓪𝓽𝓲𝓷𝓰 𝓲𝓶𝓪𝓰𝓮...");
+
+ try {
+ const url = `https://hopelessmahi.onrender.com/api/image?prompt=${encodeURIComponent(prompt)}`;
+
+ // First try to fetch as JSON (some APIs send JSON with image URL)
+ const response = await axios.get(url);
+ const contentType = response.headers["content-type"];
+
+ const folder = path.join(__dirname, "cache");
+ if (!fs.existsSync(folder)) fs.mkdirSync(folder);
+
+ const filePath = path.join(folder, `${Date.now()}_gen.png`);
+
+ if (contentType.includes("application/json")) {
+ // If JSON, parse and get image URL or base64 data
+ const data = response.data;
+ let imageUrl = "";
+
+ // Example for typical response containing URL or base64
+ if (typeof data === "string") {
+ // if JSON is stringified inside string
+ try {
+ const parsed = JSON.parse(data);
+ if (parsed.url) imageUrl = parsed.url;
+ else if (parsed.image) imageUrl = parsed.image;
+ else throw new Error("No image url found");
+ } catch {
+ throw new Error("Invalid JSON response");
+ }
+ } else if (typeof data === "object") {
+ if (data.url) imageUrl = data.url;
+ else if (data.image) imageUrl = data.image;
+ else throw new Error("No image url found");
+ }
+
+ if (!imageUrl) throw new Error("No image URL or data found in API response");
+
+ if (imageUrl.startsWith("data:image")) {
+ // base64 image, decode and save
+ const base64Data = imageUrl.split(",")[1];
+ fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
+ } else {
+ // image URL, download binary
+ const imgRes = await axios.get(imageUrl, { responseType: "arraybuffer" });
+ fs.writeFileSync(filePath, Buffer.from(imgRes.data, "binary"));
+ }
+ } else if (contentType.startsWith("image/")) {
+ // Direct image binary
+ const imgRes = await axios.get(url, { responseType: "arraybuffer" });
+ fs.writeFileSync(filePath, Buffer.from(imgRes.data, "binary"));
+ } else {
+ throw new Error(`Unexpected content-type: ${contentType}`);
+ }
+
+ await message.reply({
+ body: `🖼️ 𝓗𝓮𝓻𝓮'𝓼 𝔂𝓸𝓾𝓻 𝓲𝓶𝓪𝓰𝓮~\n🎨 Prompt: "${prompt}"`,
+ attachment: fs.createReadStream(filePath),
+ });
+ } catch (err) {
+ console.error("gen error:", err.response?.data || err.message || err);
+ message.reply("❌ | Failed to generate image.");
+ }
+ },
 };

@@ -8,14 +8,14 @@ module.exports = {
 		name: "customrankcard",
 		aliases: ["crc", "customrank"],
 		version: "1.12",
-		author: "NTKhang",
+		author: "Chitron Bhattacharjee",
 		countDown: 5,
 		role: 0,
 		description: {
 			vi: "Thiết kế thẻ rank theo ý bạn",
 			en: "Design rank card by your own"
 		},
-		category: "rank",
+		category: "𝗙𝗨𝗡 & 𝗚𝗔𝗠𝗘",
 		guide: {
 			vi: {
 				body: "   {pn} [maincolor | subcolor | linecolor | expbarcolor | progresscolor | alphasubcolor | textcolor | namecolor | expcolor | rankcolor | levelcolor | reset] <value>"
