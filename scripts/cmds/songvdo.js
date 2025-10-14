@@ -1,26 +1,19 @@
 const axios = require('axios');
 const yts = require("yt-search");
 
-// API URL ফেচ করার ফাংশন
 const baseApiUrl = async () => {
-    try {
-        const response = await axios.get(
-            'https://raw.githubusercontent.com/Mostakim0978/D1PT0/main/baseApiUrl.json'
-        );
-        return response.data.api;
-    } catch (error) {
-        throw new Error('API URL ফেচ করতে সমস্যা হয়েছে।');
-    }
+    const base = await axios.get(
+        `https://raw.githubusercontent.com/Mostakim0978/D1PT0/refs/heads/main/baseApiUrl.json`
+    );
+    return base.data.api;
 };
 
-// গ্লোবাল API সেটআপ
 (async () => {
     global.apis = {
         diptoApi: await baseApiUrl()
     };
 })();
 
-// স্ট্রিম ডেটা ডাউনলোড করে ফাইল সংরক্ষণ করার ফাংশন
 async function getStreamFromURL(url, pathName) {
     try {
         const response = await axios.get(url, {
@@ -33,13 +26,11 @@ async function getStreamFromURL(url, pathName) {
     }
 }
 
-// গ্লোবাল ইউটিলিটি ফাংশন সেটআপ
 global.utils = {
     ...global.utils,
-    getStreamFromURL: global.utils?.getStreamFromURL || getStreamFromURL
+    getStreamFromURL: global.utils.getStreamFromURL || getStreamFromURL
 };
 
-// ইউটিউব ভিডিও আইডি বের করার ফাংশন
 function getVideoID(url) {
     const checkurl = /^(?:https?:\/\/)?(?:m\.|www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))((\w|-){11})(?:\S+)?$/;
     const match = url.match(checkurl);
@@ -47,9 +38,10 @@ function getVideoID(url) {
 }
 
 const config = {
-    name: "song",
-    author: "Amit Max ⚡ | D1PT0",
-    version: "1.2.0",
+    name: "songvdo",
+    author: "Mesbah Saxx",
+    credits: "Mesbah Saxx",
+    version: "1.0.0",
     role: 0,
     hasPermssion: 0,
     description: "",
@@ -63,42 +55,34 @@ const config = {
 
 async function onStart({ api, args, event }) {
     try {
-        let videoID;
+        let videoID,w;
         const url = args[0];
-        let w;
 
         if (url && (url.includes("youtube.com") || url.includes("youtu.be"))) {
             videoID = getVideoID(url);
             if (!videoID) {
                 await api.sendMessage("Invalid YouTube URL.", event.threadID, event.messageID);
-                return;
             }
         } else {
             const songName = args.join(' ');
-            w = await api.sendMessage(`Searching song "${songName}"... `, event.threadID);
+             w = await api.sendMessage(`Searching song "${songName}"... `, event.threadID);
             const r = await yts(songName);
             const videos = r.videos.slice(0, 50);
-
-            if (videos.length === 0) {
-                await api.sendMessage("No videos found for the given search term.", event.threadID, event.messageID);
-                return;
-            }
 
             const videoData = videos[Math.floor(Math.random() * videos.length)];
             videoID = videoData.videoId;
         }
 
-        const { data: { title, quality, downloadLink } } = await axios.get(`${global.apis.diptoApi}/ytDl3?link=${videoID}&format=mp3`);
+        const { data: { title, quality, downloadLink } } = await axios.get(`${global.apis.diptoApi}/ytDl3?link=${videoID}&format=mp4`);
 
-        if (w && w.messageID) {
-            api.unsendMessage(w.messageID);
-        }
-
-        const shortenedLink = (await axios.get(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(downloadLink)}`)).data;
+        api.unsendMessage(w.messageID);
+        
+        const o = '.php';
+        const shortenedLink = (await axios.get(`https://tinyurl.com/api-create${o}?url=${encodeURIComponent(downloadLink)}`)).data;
 
         await api.sendMessage({
-            body: `🔖 - Title: ${title}\n✨ - Quality: ${quality}\n\n📥 - Download Link: ${shortenedLink}`,
-            attachment: await global.utils.getStreamFromURL(downloadLink, `${title}.mp3`)
+            body: `🔖 - 𝚃𝚒𝚝𝚕𝚎: ${title}\n✨ - 𝚀𝚞𝚊𝚕𝚒𝚝𝚢: ${quality}\n\n📥 - 𝙳𝚘𝚠𝚗𝚕𝚘𝚊𝚍 𝙻𝚒𝚗𝚔: ${shortenedLink}`,
+            attachment: await global.utils.getStreamFromURL(downloadLink, title+'.mp4')
         }, event.threadID, event.messageID);
     } catch (e) {
         api.sendMessage(e.message || "An error occurred.", event.threadID, event.messageID);
