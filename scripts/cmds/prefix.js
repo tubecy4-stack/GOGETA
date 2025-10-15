@@ -129,7 +129,7 @@ module.exports = {
       const canvas = Canvas.createCanvas(1000, 500);
       const ctx = canvas.getContext("2d");
 
-      const bgImg = await Canvas.loadImage("https://i.imgur.com/V8Rved1.jpeg");
+      const bgImg = await Canvas.loadImage("https://i.imgur.com/oyh4p3V.jpeg");
       ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 
       const buffer = canvas.toBuffer("image/png");
