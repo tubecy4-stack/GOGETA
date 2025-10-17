@@ -1,44 +1,45 @@
-const DIG = require("discord-image-generation");
-const fs = require("fs-extra");
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
 
 module.exports = {
-  config: {
-    name: "jail",
-    version: "1.1",
-    author: "Samir Thakuri",
-    countDown: 5,
-    role: 0,
-    shortDescription: "Jail image",
-    longDescription: "Jail image",
-    category: "fun",
-    guide: {
-      en: "{pn} @tag"
-    }
-  },
-
-  langs: {
-    vi: {
-      noTag: "Bạn phải tag người bạn muốn tù"
+    config: {
+        name: 'jail',
+        version: '1.0',
+        author: 'Farhan',
+        countDown: 10,
+        prefix: true,
+        groupAdminOnly: false,
+        description: 'Put user\'s avatar under a jail bars overlay effect.',
+        category: 'fun',
+        guide: {
+            en: '{pn} [reply/tag user]',
+        }
     },
-    en: {
-      noTag: "You must tag the person you want to jail"
-    }
-  },
 
-  onStart: async function ({ event, message, usersData, args, getLang }) {
-    const uid1 = event.senderID;
-    const uid2 = Object.keys(event.mentions)[0];
-    if (!uid2)
-      return message.reply(getLang("noTag"));
-    const avatarURL1 = await usersData.getAvatarUrl(uid1);
-    const avatarURL2 = await usersData.getAvatarUrl(uid2);
-    const img = await new DIG.Jail().getImage(avatarURL2);
-    const pathSave = `${__dirname}/tmp/${uid2}_Jail.png`;
-    fs.writeFileSync(pathSave, Buffer.from(img));
-    const content = args.join(' ').replace(Object.keys(event.mentions)[0], "");
-    message.reply({
-      body: `${(content || "You're in jail!")} 🚔`,
-      attachment: fs.createReadStream(pathSave)
-    }, () => fs.unlinkSync(pathSave));
-  }
+    onStart: async function ({ api, event, args }) {
+        try {
+            const mention = Object.keys(event.mentions)[0] || event.senderID;
+            const userAvatar = await api.getUserInfo(mention)
+                .then(info => info[mention]?.thumbSrc || `https://graph.facebook.com/${mention}/picture?width=512&height=512`);
+
+            const url = `https://sus-apis.onrender.com/api/jail?image=${encodeURIComponent(userAvatar)}`;
+
+            const response = await axios.get(url, { responseType: 'arraybuffer' });
+            const imgPath = path.join(__dirname, 'cache', `jail_${mention}.png`);
+            fs.writeFileSync(imgPath, Buffer.from(response.data, 'binary'));
+
+            api.sendMessage(
+                {
+                    body: "🚔 Justice has been served! You're in jail now. 🏛️",
+                    attachment: fs.createReadStream(imgPath),
+                },
+                event.threadID,
+                () => fs.unlinkSync(imgPath),
+                event.messageID
+            );
+        } catch (err) {
+            api.sendMessage(`❌ Error: ${err.message}`, event.threadID, event.messageID);
+        }
+    }
 };

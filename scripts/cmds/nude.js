@@ -1,36 +1,25 @@
-const axios = require("axios");
-
-module.exports = {
-  config: {
-    name: "nude",
-    version: "1.0",
-    author: "Mostakim",
-    countDown: 5,
-    role: 0,
-    shortDescription: "Generate nude image (API demo)",
-    longDescription: "Fetch a NSFW image using a fixed UID",
-    category: "18+",
-    guide: "{p}nude"
-  },
-
-  onStart: async function ({ message }) {
-    const uid = "100085332887575";
-
-    try {
-      const res = await axios.get(`https://mostakim.onrender.com/nude?uid=${uid}`);
-      const data = res.data;
-
-      if (data.success && data.url) {
-        const imageRes = await axios.get(data.url, { responseType: 'stream' });
-        return message.reply({
-          body: `Type: ${data.type}`,
-          attachment: imageRes.data
-        });
-      } else {
-        return message.reply("Failed to fetch image.");
-      }
-    } catch (err) {
-      return message.reply("Error occurred: " + err.message);
-    }
-  }
+module.exports.config = {
+  name: "nude",
+  version: "1.0.1",
+  hasPermssion: 0,
+  credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
+  description: "",
+  commandCategory: "18+",
+  usages: "",
+    cooldowns: 5,
+    dependencies: {"fs-extra": "","axios": ""}
 };
+
+module.exports.run = async function ({ event, api }) {
+    const axios = require("axios")
+    const fs = require("fs-extra");
+    var getlink = (await axios.get(`https://api-milo.herokuapp.com/nude`)).data;
+    var url = getlink.url
+    var stt = getlink.stt
+    var length = getlink.length
+    var getimg = (await axios.get(url, {responseType: "arraybuffer"})).data;
+    fs.writeFileSync(__dirname + `/cache/${event.senderID}-${event.threadID}.png`, Buffer.from(getimg, "utf-8")); 
+    api.sendMessage({body: `ảnh số : (${stt}/${length})`,attachment: fs.createReadStream(__dirname + `/cache/${event.senderID}-${event.threadID}.png`)}, event.threadID, () => fs.unlinkSync(__dirname + `/cache/${event.senderID}-${event.threadID}.png`), event.messageID);
+
+    console.log(getlink)
+}

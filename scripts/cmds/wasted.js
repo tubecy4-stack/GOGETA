@@ -2,7 +2,7 @@ module.exports.config = {
   name: "wasted",
   version: "1.0.1",
   hasPermssion: 0,
-  credits: "Joshua Sy",
+  credits: "𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
   description: "communism",
   commandCategory: "banner",
   cooldowns: 2,
