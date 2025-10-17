@@ -1,44 +1,92 @@
-const axios = require("axios");
-module.exports.config = {
-    name: "ai",
-    version: "1.0.0",
-    hasPermssion: 0,
-    credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-    description: "BlackBoxAi by Priyansh",
-    commandCategory: "ai",
-    usages: "[ask]",
-    cooldowns: 2,
-    dependecies: {
-        "axios": "1.4.0"
+ const axios = require('axios');
+
+let PriyaPrefix = [
+  'question',
+  'ai',
+  '.ai', // Add Your Prefix Here
+];
+
+const axiosInstance = axios.create();
+
+module.exports = {
+  config: {
+    name: 'ai',
+    version: '2.2.0',
+    role: 0,
+    category: 'AI',
+    author: 'Priyanshi || Priyansh',
+    shortDescription: 'Artificial Intelligence',
+    longDescription: 'Ask Anything To Ai For Your Answers',
+  },
+
+  onStart: async function () {},
+
+  onChat: async function ({ message, event, args, api, threadID, messageID }) {
+    const command = args[0].toLowerCase();
+
+    // Help Command
+    if (command === 'help') {
+      const helpMessage = `
+      🌟 *AI Commands* 🌟
+      - Prefixes: ${PriyaPrefix.join(', ')}
+      - Add Prefix: addprefix <prefix>
+      - AI Query: ${PriyaPrefix[0]} <your query>
+      - Say Hi: hi
+      `;
+      await message.reply(helpMessage);
+      return;
     }
-};
 
-module.exports.run = async function ({ api, event, args, Users }) {
+    // Add New Prefix Command
+    if (command === 'addprefix') {
+      const newPrefix = args[1];
+      if (newPrefix && !PriyaPrefix.includes(newPrefix)) {
+        PriyaPrefix.push(newPrefix);
+        await message.reply(`New prefix "${newPrefix}" added successfully!`);
+      } else {
+        await message.reply('Please provide a valid and unique prefix.');
+      }
+      return;
+    }
 
-  const { threadID, messageID } = event;
+    // Check for prefixes in the message
+    const ahprefix = PriyaPrefix.find((p) => event.body && event.body.toLowerCase().startsWith(p));
+    if (!ahprefix) {
+      return;
+    }
 
-  const query = encodeURIComponent(args.join(" "));
+    const priya = event.body.substring(ahprefix.length).trim();
+    if (!priya) {
+      await message.reply('Enter a question 🥹?');
+      return;
+    }
 
-  var name = await Users.getNameUser(event.senderID);
+    const apply = [
+      '𝚎𝚗𝚝𝚎𝚛 (𝚚)*',
+      '𝙷𝚘𝚠 𝙲𝚊𝚗 𝙸 𝙷𝚎𝚕𝚙 𝚈𝚘𝚞?',
+      '𝚀𝚞𝚊𝚛𝚢 𝙿𝚕𝚎𝚊𝚜𝚎....',
+      '𝙷𝚘𝚠 𝙲𝚊𝚗 𝙸 𝙰𝚜𝚜𝚒𝚜𝚝 𝚈𝚘𝚞?',
+      '𝙶𝚛𝚎𝚎𝚝𝚒𝚗𝚐𝚜!',
+      '𝙸𝚜 𝚃𝚑𝚎𝚛𝚎 𝚊𝚗𝚢𝚝𝚑𝚒𝚗𝚐 𝙴𝚕𝚜𝚎 𝙸 𝙲𝚊𝚗 𝙳𝚘?'
+    ];
+    const randomapply = apply[Math.floor(Math.random() * apply.length)];
 
-  if (!args[0]) return api.sendMessage("Please type a message...", threadID, messageID );
-  
-  api.sendMessage("Searching for an answer, please wait...", threadID, messageID);
+    if (command === 'hi') {
+      await message.reply(randomapply);
+      return;
+    }
 
-  try{
+    const encodedPrompt = encodeURIComponent(args.join(' '));
 
-    api.setMessageReaction("⌛", event.messageID, () => { }, true);
+    await message.reply('Please wait 🥹');
 
-    const res = await axios.get(`https://blackboxai-tlh1.onrender.com/api/blackboxai?query=${encodeURIComponent(query)}`);
-
-    const data = res.data.priyansh;
-
-    api.sendMessage(data, event.threadID, event.messageID);
-
-    api.setMessageReaction("✅", event.messageID, () => { }, true);
-}
-  catch (error) {
-    console.error('Error fetching package.json:', error);
-  api.sendMessage("An error occurred while fetching data. Please try again later.", event.threadID, event.messageID);
+    try {
+      const response = await axiosInstance.get(`https://priyansh-ai.onrender.com/gemini/ai?query=${encodedPrompt}`);
+      const Priya = response.data;
+      const priyares = `${Priya}`;
+      await message.reply(priyares);
+    } catch (error) {
+      await message.reply('Oops! Something went wrong. Please try again later.');
+    }
   }
 };

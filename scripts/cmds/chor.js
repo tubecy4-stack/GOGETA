@@ -1,53 +1,47 @@
-const axios = require('axios');
-const jimp = require("jimp");
-const fs = require("fs");
-
-module.exports = {
-  config: {
-    name: "chor",
-    aliases: ["mystery"],
-    version: "1.2",
-    author: "Samir (Enhanced by ChatGPT)",
-    countDown: 5,
-    role: 0,
-    shortDescription: "Put a mysterious person in a kidnap frame",
-    longDescription: "Fun command to place tagged or sender in a mysterious wanted-like frame",
-    category: "fun",
-    guide: {
-      en: "{pn} @tag",
-      vi: "{pn} @tag"
-    }
-  },
-
-  onStart: async function ({ message, event }) {
-    const mention = Object.keys(event.mentions);
-    const userID = mention.length > 0 ? mention[0] : event.senderID;
-
-    try {
-      const imgPath = await createKidnapImage(userID);
-      await message.reply({
-        body: "Who's behind the mask?",
-        attachment: fs.createReadStream(imgPath)
-      });
-      fs.unlinkSync(imgPath); // Auto delete image after sending
-    } catch (err) {
-      console.error(err);
-      message.reply("Failed to generate the kidnap image.");
-    }
-  }
+module.exports.config = {
+	name: "chor",
+	version: "1.0.1",
+	hasPermssion: 0,
+	credits: "Joshua Sy",
+	description: "scooby doo template memes",
+	commandCategory: "Picture",
+	usages: "...",
+	cooldowns: 5,
+	dependencies: {
+	 "fs-extra": "",
+	 "axios": "",
+	 "canvas" :"",
+	 "jimp": "",
+	 "node-superfetch": ""
+	}
 };
 
-async function createKidnapImage(id) {
-  const token = "6628568379|c1e620fa708a1d5696fb991c1bde5662";
-  const avatar = await jimp.read(`https://graph.facebook.com/${id}/picture?width=512&height=512&access_token=${token}`);
-  avatar.circle();
+module.exports.circle = async (image) => {
+	 const jimp = global.nodemodule['jimp'];
+ 	image = await jimp.read(image);
+ 	image.circle();
+ 	return await image.getBufferAsync("image/png");
+};
 
-  // Working stylish frame (replaceable)
-  const background = await jimp.read("https://i.imgur.com/ES28alv.png");
-
-  background.resize(500, 670).composite(avatar.resize(111, 111), 48, 410);
-
-  const outputPath = `kidnap_${Date.now()}.png`;
-  await background.writeAsync(outputPath);
-  return outputPath;
-  }
+module.exports.run = async ({ event, api, args, Users }) => {
+try {
+ const Canvas = global.nodemodule['canvas'];
+ const request = global.nodemodule["node-superfetch"];
+ const jimp = global.nodemodule["jimp"];
+ const fs = global.nodemodule["fs-extra"];
+ var path_toilet = __dirname+'/cache/damma.jpg'; 
+ var id = Object.keys(event.mentions)[0] || event.senderID;
+ const canvas = Canvas.createCanvas(500, 670);
+	const ctx = canvas.getContext('2d');
+	const background = await Canvas.loadImage('https://i.imgur.com/ES28alv.png');
+ 
+	var avatar = await request.get(`https://graph.facebook.com/${id}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`);
+	avatar = await this.circle(avatar.body);
+	ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+	ctx.drawImage(await Canvas.loadImage(avatar), 48, 410, 111, 111);
+	const imageBuffer = canvas.toBuffer();
+	fs.writeFileSync(path_toilet,imageBuffer);
+	 api.sendMessage({attachment: fs.createReadStream(path_toilet, {'highWaterMark': 128 * 1024}), body: "╭──────•◈•───────╮\n 𝗜𝘀𝗹𝗮𝗺𝗶𝗰𝗸 𝗰𝗵𝗮𝘁 𝗯𝗼𝘁 \n\nমুরগির দুধ চুরি করতে গিয়া ধরা থাইসে_ 🐸👻\n\n BOT OWNER Ullash ッ\n╰──────•◈•───────╯"}, event.threadID, () => fs.unlinkSync(path_toilet), event.messageID);
+}
+catch(e) {api.sendMessage(e.stack, event.threadID )}
+ }

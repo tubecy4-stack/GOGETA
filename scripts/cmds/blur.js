@@ -1,57 +1,61 @@
-const axios = require("axios");
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
 
 module.exports = {
-  config: {
-    name: "blur",
-    version: "1.0",
-    author: "Chitron Bhattacharjee",
-    countDown: 10,
-    role: 0,
-    shortDescription: {
-      en: "Apply blur effect to profile picture"
+    config: {
+        name: 'blur',
+        version: '1.0',
+        author: 'Farhan',
+        countDown: 10,
+        prefix: true,
+        groupAdminOnly: false,
+        description: 'Blur an image by replying or mentioning a user.',
+        category: 'image',
+        guide: {
+            en: '   {pn} [reply to image/@mention|uid|reply]'
+        },
     },
-    description: {
-      en: "Adds a blur effect to your or mentioned user's profile picture"
+
+    onStart: async ({ api, event }) => {
+        const { senderID, mentions, messageReply } = event;
+        let targetImage = null;
+
+        // If user replies to an image
+        if (messageReply && messageReply.attachments && messageReply.attachments[0]?.url) {
+            targetImage = messageReply.attachments[0].url;
+        }
+        // If mention -> fetch FB avatar
+        else if (Object.keys(mentions).length > 0) {
+            const targetID = Object.keys(mentions)[0];
+            targetImage = `https://graph.facebook.com/${targetID}/picture?width=512&height=512&access_token=6628568379|c1e620fa708a1d5696fb991c1bde5662`;
+        }
+        // Fallback: user’s own avatar
+        else {
+            targetImage = `https://graph.facebook.com/${senderID}/picture?width=512&height=512&access_token=6628568379|c1e620fa708a1d5696fb991c1bde5662`;
+        }
+
+        const apiUrl = `https://sus-apis.onrender.com/api/blur?image=${encodeURIComponent(targetImage)}`;
+
+        try {
+            console.log(`[API Request] Sending to: ${apiUrl}`);
+            const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
+            console.log(`[API Response] Status: ${response.status}, Status Text: ${response.statusText}`);
+
+            const cacheDir = path.join(__dirname, 'cache');
+            if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
+
+            const imagePath = path.join(cacheDir, `blur_${Date.now()}.jpg`);
+            fs.writeFileSync(imagePath, Buffer.from(response.data, 'binary'));
+
+            api.sendMessage({
+                body: "✨ Here’s your blurred image!",
+                attachment: fs.createReadStream(imagePath)
+            }, event.threadID, () => fs.unlinkSync(imagePath));
+
+        } catch (error) {
+            console.error("Error generating blur image:", error);
+            api.sendMessage("❌ Sorry, I couldn't blur the image right now.", event.threadID);
+        }
     },
-    category: "𝗙𝗨𝗡 & 𝗚𝗔𝗠𝗘",
-    guide: {
-      en: "{p}blur [@mention or reply]\nIf no mention or reply, uses your profile picture."
-    }
-  },
-
-  onStart: async function ({ api, event, message }) {
-    const { senderID, mentions, type, messageReply } = event;
-
-    // Determine user ID for avatar
-    let uid;
-    if (Object.keys(mentions).length > 0) {
-      uid = Object.keys(mentions)[0];
-    } else if (type === "message_reply") {
-      uid = messageReply.senderID;
-    } else {
-      uid = senderID;
-    }
-
-    const avatarURL = `https://graph.facebook.com/${uid}/picture?width=512&height=512&access_token=350685531728|62f8ce9f74b12f84c123cc23437a4a32`;
-
-    try {
-      const res = await axios.get(`https://api.popcat.xyz/v2/blur?image=${encodeURIComponent(avatarURL)}`, {
-        responseType: "arraybuffer"
-      });
-
-      const filePath = path.join(__dirname, "cache", `blur_${uid}_${Date.now()}.png`);
-      fs.writeFileSync(filePath, res.data);
-
-      message.reply({
-        body: "🌫️ Here's your blurred image!",
-        attachment: fs.createReadStream(filePath)
-      }, () => fs.unlinkSync(filePath));
-
-    } catch (err) {
-      console.error(err);
-      message.reply("❌ | Failed to generate blurred image.");
-    }
-  }
 };
