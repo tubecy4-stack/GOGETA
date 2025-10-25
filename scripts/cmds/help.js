@@ -1,169 +1,143 @@
-const { getPrefix } = global.utils;
-const { commands, aliases } = global.GoatBot;
-const https = require("https");
-const fs = require("fs");
+const fs = require("fs-extra");
 const path = require("path");
-
-const GIF_URL = "https://i.imgur.com/RW1P8A3.gif";
-const GIF_PATH = path.join(__dirname, "help.gif");
-
-// Simple fuzzy search for suggestion
-function getClosestCommand(name) {
-  const lowerName = name.toLowerCase();
-  let closest = null;
-  let minDist = Infinity;
-
-  for (const cmdName of commands.keys()) {
-    const dist = levenshteinDistance(lowerName, cmdName.toLowerCase());
-    if (dist < minDist) {
-      minDist = dist;
-      closest = cmdName;
-    }
-  }
-  if (minDist <= 3) return closest;
-  return null;
-}
-
-// Levenshtein distance function (edit distance)
-function levenshteinDistance(a, b) {
-  const matrix = Array(b.length + 1)
-    .fill(null)
-    .map(() => Array(a.length + 1).fill(null));
-
-  for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
-  for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
-
-  for (let j = 1; j <= b.length; j++) {
-    for (let i = 1; i <= a.length; i++) {
-      const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
-      matrix[j][i] = Math.min(
-        matrix[j][i - 1] + 1,
-        matrix[j - 1][i] + 1,
-        matrix[j - 1][i - 1] + indicator
-      );
-    }
-  }
-  return matrix[b.length][a.length];
-}
+const https = require("https");
 
 module.exports = {
   config: {
     name: "help",
-    version: "1.25",
-    author: "Ew'r Saim",//modified by NeoKEX
-    countDown: 5,
-    role: 0,
-    shortDescription: { en: "View command usage and list all commands directly" },
-    longDescription: { en: "View command usage and list all commands directly" },
-    category: "info",
-    guide: { en: "{pn} / help [category] or help commandName" },
-    priority: 1,
+    aliases: ["menu", "commands"],
+    version: "4.8",
+    author: "NeoKEX",
+    shortDescription: "Show all available commands",
+    longDescription: "Displays a clean and premium-styled categorized list of commands.",
+    category: "system",
+    guide: "{pn}help [command name]"
   },
 
-  onStart: async function ({ message, args, event, role }) {
-    const { threadID } = event;
-    const prefix = getPrefix(threadID);
+  onStart: async function ({ message, args, prefix }) {
+    const allCommands = global.GoatBot.commands;
     const categories = {};
 
-    for (const [name, value] of commands) {
-      if (!value?.config || typeof value.onStart !== "function") continue;
-      if (value.config.role > 1 && role < value.config.role) continue;
+    const emojiMap = {
+      ai: "➥", "ai-image": "➥", group: "➥", system: "➥",
+      fun: "➥", owner: "➥", config: "➥", economy: "➥",
+      media: "➥", "18+": "➥", tools: "➥", utility: "➥",
+      info: "➥", image: "➥", game: "➥", admin: "➥",
+      rank: "➥", boxchat: "➥", others: "➥"
+    };
 
-      const category = value.config.category?.toLowerCase() || "uncategorized";
-      if (!categories[category]) categories[category] = [];
-      categories[category].push(name);
+    const cleanCategoryName = (text) => {
+      if (!text) return "others";
+      return text
+        .normalize("NFKD")
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    };
+
+    // Group commands by category
+    for (const [name, cmd] of allCommands) {
+      const cat = cleanCategoryName(cmd.config.category);
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push(cmd.config.name);
     }
 
-    const rawInput = args.join(" ").trim();
+    // GIF URLs
+    const gifURLs = [
+      "https://i.imgur.com/ejqdK51.gif",
+      "https://i.imgur.com/ltIztKe.gif",
+      "https://i.imgur.com/5oqrQ0i.gif",
+      "https://i.imgur.com/qf2aZH8.gif",
+      "https://i.imgur.com/3QzYyye.gif",
+      "https://i.imgur.com/ffxzucB.gif",
+      "https://i.imgur.com/3QSsSzA.gif",
+      "https://i.imgur.com/Ih819LH.gif"
+    ];
 
-    let msg = "";
+    // pick random gif
+    const randomGifURL = gifURLs[Math.floor(Math.random() * gifURLs.length)];
+    const gifFolder = path.join(__dirname, "cache");
+    if (!fs.existsSync(gifFolder)) fs.mkdirSync(gifFolder, { recursive: true });
+    const gifName = path.basename(randomGifURL);
+    const gifPath = path.join(gifFolder, gifName);
 
-    if (!rawInput) {
-      msg += "╔═══════════════╗\n";
-      msg += " GOGETA HELP MENU\n";
-      msg += "╚═══════════════╝\n";
-
-      for (const category of Object.keys(categories).sort()) {
-        const cmdList = categories[category];
-        msg += `┍━━━[ ${category.toUpperCase()} ]\n`;
-
-        const sortedNames = cmdList.sort((a, b) => a.localeCompare(b));
-        for (const cmdName of sortedNames) {
-          msg += `┋〄 ${cmdName}\n`;
-        }
-
-        msg += "┕━━━━━━━━━━━━◊\n";
-      }
-
-      msg += "┍━━━[ INFO ]━━━◊\n";
-      msg += `┋➥ TOTAL CMD: [${commands.size}]\n`;
-      msg += `┋➥ PREFIX: ${prefix}\n`;
-      msg += `┋ OWNER: Ibne Saad 🐔\n`;
-      msg += "┕━━━━━━━━━━━◊";
-
-    } else {
-      const commandName = rawInput.toLowerCase();
-      const command = commands.get(commandName) || commands.get(aliases.get(commandName));
-
-      if (!command || !command?.config) {
-        const suggestion = getClosestCommand(commandName);
-        if (suggestion) {
-          return message.reply(`❌ Command "${commandName}" not found.\n👉 Did you mean: "${suggestion}"?`);
-        } else {
-          return message.reply(`❌ Command "${commandName}" not found.\nTry: /help or /help [category]`);
-        }
-      }
-
-      const configCommand = command.config;
-      const roleText = roleTextToString(configCommand.role);
-      const author = configCommand.author || "Unknown";
-      const longDescription = configCommand.longDescription?.en || "No description available.";
-      const guideBody = configCommand.guide?.en || "No guide available.";
-      const usage = guideBody.replace(/{pn}/g, `${prefix}${configCommand.name}`);
-
-      msg += ` ╔══ [ COMMAND INFO ] ══╗
-┋🧩 Name       : ${configCommand.name}
-┋🗂️ Category   : ${configCommand.category || "Uncategorized"}
-┋📜 Description: ${longDescription}
-┋🔁 Aliases    : None
-┋⚙️ Version    : ${configCommand.version || "1.0"}
-┋🔐 Permission : ${configCommand.role} (${roleText})
-┋⏱️ Cooldown   : ${configCommand.countDown || 5}s
-┋👑 Author     : ${author}
-┋📖 Usage      : ${usage}
-╚════════════════════╝`;
+    // download if not exists
+    if (!fs.existsSync(gifPath)) {
+      await downloadGif(randomGifURL, gifPath);
     }
 
-    // Ensure GIF is downloaded once
-    if (!fs.existsSync(GIF_PATH)) {
-      await downloadGif(GIF_URL, GIF_PATH);
+    // Single command detail
+    if (args[0]) {
+      const query = args[0].toLowerCase();
+      const cmd =
+        allCommands.get(query) ||
+        [...allCommands.values()].find((c) => (c.config.aliases || []).includes(query));
+      if (!cmd) return message.reply(`❌ Command "${query}" not found.`);
+
+      const {
+        name,
+        version,
+        author,
+        guide,
+        category,
+        shortDescription,
+        longDescription,
+        aliases
+      } = cmd.config;
+
+      const desc =
+        typeof longDescription === "string"
+          ? longDescription
+          : longDescription?.en || shortDescription?.en || shortDescription || "No description";
+
+      const usage =
+        typeof guide === "string"
+          ? guide.replace(/{pn}/g, prefix)
+          : guide?.en?.replace(/{pn}/g, prefix) || `${prefix}${name}`;
+
+      return message.reply({
+        body:
+          `☠️ 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗜𝗡𝗙𝗢 ☠️\n\n` +
+          `➥ Name: ${name}\n` +
+          `➥ Category: ${category || "Uncategorized"}\n` +
+          `➥ Description: ${desc}\n` +
+          `➥ Aliases: ${aliases?.length ? aliases.join(", ") : "None"}\n` +
+          `➥ Usage: ${usage}\n` +
+          `➥ Author: ${author || "Unknown"}\n` +
+          `➥ Version: ${version || "1.0"}`,
+        attachment: fs.createReadStream(gifPath)
+      });
     }
+
+    // Format all commands
+    const formatCommands = (cmds) =>
+      cmds.sort().map((cmd) => `│ ∘ ${cmd}`).join("\n");
+
+    let msg = `╭━ 🎯 𝑪𝑶𝑴𝑴𝑨𝑵𝑫𝑺 ━╮\n`;
+    const sortedCategories = Object.keys(categories).sort();
+    for (const cat of sortedCategories) {
+      const emoji = emojiMap[cat] || "➥";
+      msg += `\n${emoji} ${cat.toUpperCase()}\n`;
+      msg += `${formatCommands(categories[cat])}\n`;
+    }
+    msg += `\n╰➤ Use: ${prefix}help [command name] for details`;
 
     return message.reply({
       body: msg,
-      attachment: fs.createReadStream(GIF_PATH)
+      attachment: fs.createReadStream(gifPath)
     });
   }
 };
 
-// Helper to convert role number to text
-function roleTextToString(role) {
-  switch (role) {
-    case 0: return "All users";
-    case 1: return "Group Admins";
-    case 2: return "Bot Admins";
-    default: return "Unknown";
-  }
-}
-
-// Download gif if not exists
+// helper to download GIF
 function downloadGif(url, dest) {
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(dest);
     https.get(url, (res) => {
       if (res.statusCode !== 200) {
         fs.unlink(dest, () => {});
-        return reject(new Error(`Failed to get '${url}' (${res.statusCode})`));
+        return reject(new Error(`Failed to download '${url}' (${res.statusCode})`));
       }
       res.pipe(file);
       file.on("finish", () => file.close(resolve));

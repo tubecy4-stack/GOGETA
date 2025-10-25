@@ -1,23 +1,45 @@
-module.exports.config = {
-  name: "restart",
-  version: "1.0.0",
-  hasPermssion: 2,
-  credits: "NAZRUL",
-  description: "Restart the Bot",
-  commandCategory: "system",
-  usages: "",
-  cooldowns: 5
-};
+const fs = require("fs-extra");
 
-module.exports.run = async function ({ api, args, Users, event }) {
-  var mention = Object.keys(event.mentions)[0];
-  let name = event.mentions[mention];
-  var arraytag = [];
-  arraytag.push({ id: mention });
-  var a = function (a) { api.sendMessage(a, event.threadID); }
-  a("✅𝙔𝙤𝙪𝙧 𝙬𝙞𝙨𝙝 𝙞𝙨 𝙢𝙮 𝙘𝙤𝙢𝙢𝙖𝙣𝙙, 𝙍𝙚𝙨𝙩𝙖𝙧𝙩𝙞𝙣𝙜 𝙞𝙣..");
-  setTimeout(() => { a({ body: "3.." }) }, 5000);
-  setTimeout(() => { a({ body: "2.." }) }, 10000);
-  setTimeout(() => { a({ body: "1.." }) }, 15000);
-  setTimeout(() => { api.sendMessage("⏳𝙋𝙡𝙚𝙖𝙨𝙚 𝙬𝙖𝙞𝙩 𝙛𝙤𝙧 𝙖 𝙢𝙞𝙣𝙪𝙩𝙚, 𝙍𝙚𝙗𝙤𝙤𝙩𝙞𝙣𝙜 𝙨𝙮𝙨𝙩𝙚𝙢..", event.threadID, () => process.exit(1)) }, 20000);
+module.exports = {
+	config: {
+		name: "restart",
+		version: "1.1",
+		author: "NTKhang",
+		countDown: 5,
+		role: 2,
+		description: {
+			vi: "Khởi động lại bot",
+			en: "Restart bot"
+		},
+		category: "Owner",
+		guide: {
+			vi: "   {pn}: Khởi động lại bot",
+			en: "   {pn}: Restart bot"
+		}
+	},
+
+	langs: {
+		vi: {
+			restartting: "🔄 | Đang khởi động lại bot..."
+		},
+		en: {
+			restartting: "🔄 | Restarting bot..."
+		}
+	},
+
+	onLoad: function ({ api }) {
+		const pathFile = `${__dirname}/tmp/restart.txt`;
+		if (fs.existsSync(pathFile)) {
+			const [tid, time] = fs.readFileSync(pathFile, "utf-8").split(" ");
+			api.sendMessage(`✅ | Bot restarted\n⏰ | Time: ${(Date.now() - time) / 1000}s`, tid);
+			fs.unlinkSync(pathFile);
+		}
+	},
+
+	onStart: async function ({ message, event, getLang }) {
+		const pathFile = `${__dirname}/tmp/restart.txt`;
+		fs.writeFileSync(pathFile, `${event.threadID} ${Date.now()}`);
+		await message.reply(getLang("restartting"));
+		process.exit(2);
+	}
 };

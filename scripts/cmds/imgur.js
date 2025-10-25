@@ -1,45 +1,38 @@
-module.exports.config = {
- name: "imgur",
- version: "1.0.2", 
- hasPermssion: 0,
- credits: "Islamick Cyber Chat + Modified by Shahadat Islam",
- description: "Upload image/video/GIF to Imgur and get direct links",
- commandCategory: "other", 
- usages: "[reply with any media file]", 
- cooldowns: 0,
-};
+const axios = require("axios");
 
-module.exports.run = async ({ api, event }) => {
- const axios = global.nodemodule['axios'];
+const apikey = "66e0cfbb-62b8-4829-90c7-c78cacc72ae2";
 
- const apis = await axios.get('https://raw.githubusercontent.com/shaonproject/Shaon/main/api.json');
- const Shaon = apis.data.imgur;
+module.exports = {
+  config: {
+    name: "imgur",
+    version: "1.0",
+    author: "nexo_here",
+    category: "tools",
+    shortDescription: "Upload replied image to Imgur & get link",
+    longDescription: "Reply to an image with this command to get its Imgur link",
+    guide: "{pn}imgur (reply to an image)"
+  },
 
- const reply = event.messageReply;
- if (!reply || !reply.attachments || reply.attachments.length === 0) {
- return api.sendMessage(
- 'Please reply to the image or video with the command Imgur...!✅',
- event.threadID,
- event.messageID
- );
- }
+  onStart: async function ({ api, event }) {
+    try {
+      if (!event.messageReply || !event.messageReply.attachments || event.messageReply.attachments.length === 0) {
+        return api.sendMessage("❌ Please reply to an image.", event.threadID, event.messageID);
+      }
 
- const links = [];
+      const imageUrl = event.messageReply.attachments[0].url;
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/imgur?url=${encodeURIComponent(imageUrl)}&apikey=${apikey}`;
 
- for (const attachment of reply.attachments) {
- try {
- const url = encodeURIComponent(attachment.url);
- const upload = await axios.get(`${Shaon}/imgur?link=${url}`);
- links.push(upload.data.uploaded.image || "❌ No link received");
- } catch (e) {
- links.push("❌ Failed to upload");
- }
- }
+      const response = await axios.get(apiUrl);
+      const data = response.data;
 
- 
- const message = links.length === 1 
- ? links[0] 
- : `✅ Uploaded files Imgur links:\n\n${links.join("\n")}`;
-
- return api.sendMessage(message, event.threadID, event.messageID);
+      if (data.uploaded && data.uploaded.status === "success" && data.uploaded.image) {
+        return api.sendMessage(`✅ Uploaded successfully!\n\nLink:\n${data.uploaded.image}`, event.threadID, event.messageID);
+      } else {
+        return api.sendMessage("❌ Upload failed.", event.threadID, event.messageID);
+      }
+    } catch (error) {
+      console.error("imgur command error:", error);
+      return api.sendMessage("❌ Something went wrong.", event.threadID, event.messageID);
+    }
+  }
 };
