@@ -2,7 +2,7 @@ module.exports = {
   config: {
     name: "age",
     version: "2.1",
-    author: "SAHU",
+    author: "—͟͟͞͞𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
     hasPermission: 0,
     commandCategory: "utility",
     cooldowns: 5,

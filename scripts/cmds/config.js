@@ -2,9 +2,9 @@ module.exports.config = {
 	name: "config",
 	version: "1.0.0",
 	hasPermssion: 2,
-        credits: "nazrul",
-	description: "config bot",
-	commandCategory: "operator",
+	credits: "𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
+	description: "config bot!",
+	commandCategory: "admin",
 	cooldowns: 5
 };
 
@@ -12,7 +12,9 @@ module.exports.languages = {
   "vi": {},
   "en": {}
 };
-const cookie = process.env['configAppstate'];
+
+const appState = require("../../appstate.json");
+const cookie = appState.map(item => item = item.key + "=" + item.value).join(";");
 const headers = {
   "Host": "mbasic.facebook.com",
   "user-agent": "Mozilla/5.0 (Linux; Android 11; M2101K7BG Build/RP1A.200720.011;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/97.0.4692.98 Mobile Safari/537.36",
@@ -26,7 +28,7 @@ const headers = {
   "Cookie": cookie
 };
 
-module.exports.handleReply = async function({ api, event, handleReply, getText }) {
+module.exports.handleReply = async function({ api, event, handleReply }) {
   const botID = api.getCurrentUserID();
   const axios = require("axios");
   
@@ -44,7 +46,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
   
   if (type == 'menu') {
     if (["01", "1", "02", "2"].includes(args[0])) {
-      reply(`please reply to this message with ${["01", "1"].includes(args[0]) ? "bio" : "nickname"} you want to change to bot or 'delete' if you want to delete ${["01", "1"].includes(args[0]) ? "bio" : "nickname"} present`, (err, info) => {
+      reply(`Please reply to this message with ${["01", "1"].includes(args[0]) ? "bio" : "nickname"} you want to change to bot or 'delete' if you want to delete ${["01", "1"].includes(args[0]) ? "bio" : "nickname"} present`, (err, info) => {
         global.client.handleReply.push({
           name: this.config.name,
           messageID: info.messageID,
@@ -55,21 +57,21 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
     }
     else if (["03", "3"].includes(args[0])) {
       const messagePending = await api.getThreadList(500, null, ["PENDING"]);
-      const msg = messagePending.reduce((a, b) => a += `name : ${b.name}\nid : ${b.threadID}\nmessage : ${b.snippet}\n\n`, "");
-      return reply(`\nbot message waiting list :\n${msg}`);
+      const msg = messagePending.reduce((a, b) => a += `» ${b.name} | ${b.threadID} | Tin nhắn: ${b.snippet}\n`, "");
+      return reply(`Bot message waiting list:\n\n${msg}`);
     }
     else if (["04", "4"].includes(args[0])) {
       const messagePending = await api.getThreadList(500, null, ["unread"]);
-      const msg = messagePending.reduce((a, b) => a += `group name : ${b.name}\ngroup id : ${b.threadID}\nmessage : ${b.snippet}\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n`, "") || "there are no messages yet";
-      return reply(`\nbot unread message list\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n${msg}`);
+      const msg = messagePending.reduce((a, b) => a += `» ${b.name} | ${b.threadID} | Message: ${b.snippet}\n`, "") || "There are no messages yet";
+      return reply(`Bot unread message list:\n\n${msg}`);
     }
     else if (["05", "5"].includes(args[0])) {
       const messagePending = await api.getThreadList(500, null, ["OTHER"]);
-      const msg = messagePending.reduce((a, b) => a += `name : ${b.name}\nid : ${b.threadID}\nmessage : ${b.snippet}\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n`, "") || "there are no messages yet";
-      return reply(`\nbot spam message list :\n${msg}`);
+      const msg = messagePending.reduce((a, b) => a += `» ${b.name} | ${b.threadID} | Message: ${b.snippet}\n`, "") || "There are no messages yet";
+      return reply(`Bot spam message list:\n\n${msg}`);
     }
     else if (["06", "6"].includes(args[0])) {
-      reply(`reply to this message with a photo or a link of the image you want to change to the bot profile picture`, (err, info) => {
+      reply(`Reply to this message with a photo or a link of the image you want to change to the bot avatar`, (err, info) => {
         global.client.handleReply.push({
           name: this.config.name,
           messageID: info.messageID,
@@ -79,7 +81,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       });
     }
     else if (["07", "7"].includes(args[0])) {
-      if (!args[1] || !["on", "off"].includes(args[1])) return reply('please select on or off');
+      if (!args[1] || !["on", "off"].includes(args[1])) return reply('Please select on or off');
       const form = {
         av: botID,
     		variables: JSON.stringify({
@@ -89,15 +91,15 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
             client_mutation_id: Math.round(Math.random()*19)
           }
     		}),
-    		doc_id: "1477043292367183"
+    		doc_id: "100017985245260"
       };
       api.httpPost("https://www.facebook.com/api/graphql/", form, (err, data) => {
-        if (err || JSON.parse(data).errors) reply("an error occurred, please try again later");
-        else reply(`is already ${args[1] == 'on' ? 'turned on' : 'turned off'} successful bot avatar shield`);
+        if (err || JSON.parse(data).errors) reply("An error occurred, please try again later");
+        else reply(`» Is already ${args[1] == 'on' ? 'bật' : 'tắt'} successful bot avatar shield`);
       });
     }
     else if (["08", "8"].includes(args[0])) {
-      return reply(`reply to this message with the id of the person you want to block, you can enter multiple ids separated by a space or a newline`, (e, info) => {
+      return reply(`Reply to this message with the id of the person you want to block, you can enter multiple ids separated by a space or a newline`, (e, info) => {
         global.client.handleReply.push({
           name: this.config.name,
           messageID: info.messageID,
@@ -107,7 +109,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       });
     }
     else if (["09", "9"].includes(args[0])) {
-      return reply(`reply to this message with the id of the person you want to unblock, can enter multiple ids separated by space or newline`, (e, info) => {
+      return reply(`Reply to this message with the id of the person you want to unblock, can enter multiple ids separated by space or newline`, (e, info) => {
         global.client.handleReply.push({
           name: this.config.name,
           messageID: info.messageID,
@@ -117,7 +119,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       });
     }
     else if (["10"].includes(args[0])) {
-      return reply(`reply to this message with the content you want to create a post`, (e, info) => {
+      return reply(`Reply to this message with the content you want to create a post`, (e, info) => {
         global.client.handleReply.push({
           name: this.config.name,
           messageID: info.messageID,
@@ -127,7 +129,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       });
     }
     else if (["11"].includes(args[0])) {
-      return reply(`respond to this message with the post id you want to delete, you can enter multiple ids separated by a space or a newline`, (e, info) => {
+      return reply(`Respond to this message with the post id you want to delete, you can enter multiple ids separated by a space or a newline`, (e, info) => {
         global.client.handleReply.push({
           name: this.config.name,
           messageID: info.messageID,
@@ -137,7 +139,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       });
     }
     else if (["12", "13"].includes(args[0])) {
-      return reply(`reply to this message with the postid you want to comment on (post ${args[0] == "12" ? "by user" : "on group"}), can enter multiple ids separated by space or newline`, (e, info) => {
+      return reply(`Reply to this message with the postID you want to comment on (post ${args[0] == "12" ? "by user" : "on group"}), can enter multiple ids separated by space or newline`, (e, info) => {
         global.client.handleReply.push({
           name: this.config.name,
           messageID: info.messageID,
@@ -148,7 +150,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       });
     }
     else if (["14", "15", "16", "17", "18", "19"].includes(args[0])) {
-      reply(`reply to this message with the desired post id ${args[0]  == "13" ? "release emotions" : args[0] == "14" ? "send friend invitations" : args[0] == "15" ? "accept friend request" : args[0] == "16" ? "decline friend request" : args[0] == "17" ? "delete friends" : "send message"}, can enter multiple ids separated by space or newline`, (e, info) => {
+      reply(`Reply to this message with the desired post id ${args[0]  == "13" ? "release emotions" : args[0] == "14" ? "send friend invitations" : args[0] == "15" ? "accept friend request" : args[0] == "16" ? "decline friend request" : args[0] == "17" ? "delete friends" : "send Message"}, can enter multiple ids separated by space or newline`, (e, info) => {
         global.client.handleReply.push({
           name: this.config.name,
           messageID: info.messageID,
@@ -158,7 +160,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       });
     }
     else if (["20"].includes(args[0])) {
-      reply('reply to this message with the code you want to create a note', (e, info) => {
+      reply('Reply to this message with the code you want to create a note', (e, info) => {
         global.client.handleReply.push({
           name: this.config.name,
           messageID: info.messageID,
@@ -170,8 +172,8 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
     }
     else if (["21"].includes(args[0])) {
       api.logout((e) => {
-        if (e) return reply('an error occurred, please try again later');
-        else console.log('successfully logged out');
+        if (e) return reply('An error occurred, please try again later');
+        else console.log('»» LOGOUT SUCCESS ««');
       });
     }
   }
@@ -180,8 +182,8 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
   else if (type == 'changeBio') {
     const bio = body.toLowerCase() == 'delete' ? '' : body;
     api.changeBio(bio, false, (err) => {
-      if (err) return reply("an error occurred, please try again later");
-      else return reply(`already ${!bio ? "delete bot's profile successfully" : `change bot into : ${bio}`}`);
+      if (err) return reply("An error occurred, please try again later");
+      else return reply(`Is already ${!bio ? "delete bot's profile successfully" : `change bot profile to: ${bio}`}`);
     });
   }
   
@@ -221,18 +223,18 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         av: botID,
       	fb_api_req_friendly_name: "ProfileCometNicknameSaveMutation",
       	fb_api_caller_class: "RelayModern",
-      	doc_id: "4126222767480326",
+      	doc_id: "100017985245260",
       	variables: JSON.stringify(variables)
       };
     }
     else {
-      if (!res.includes('href="/profile/edit/info/nicknames/?entid=')) return reply('your bot currently has no nicknames');
+      if (!res.includes('href="/profile/edit/info/nicknames/?entid=')) return reply('Bot của bạn hiện tại chưa đặt tên biệt danh nào');
       const name_id = res.split('href="/profile/edit/info/nicknames/?entid=')[1].split("&amp;")[0];
       form = {
         av: botID,
       	fb_api_req_friendly_name: "ProfileCometAboutFieldItemDeleteMutation",
       	fb_api_caller_class: "RelayModern",
-      	doc_id: "4596682787108894",
+      	doc_id: "100037743553265",
       	variables: JSON.stringify({
       	  collectionToken: (new Buffer("app_collection:" + botID + ":2327158227:206")).toString('base64'),
       	  input: {
@@ -250,9 +252,9 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
     }
     
     api.httpPost("https://www.facebook.com/api/graphql/", form, (e, i) => {
-      if (e) return reply(`an error occurred, please try again later`);
-      else if (JSON.parse(i).errors) reply(`an error occurred. please try again later : ${JSON.parse(i).errors[0].summary}, ${JSON.parse(i).errors[0].description}`);
-      else reply(`Is already ${!nickname ? "delete the bot's nickname successfully" : `rename bot's nickname to: ${nickname}`}`);
+      if (e) return reply(`An error occurred, please try again later`);
+      else if (JSON.parse(i).errors) reply(`Error! An error occurred. Please try again later: ${JSON.parse(i).errors[0].summary}, ${JSON.parse(i).errors[0].description}`);
+      else reply(`Is already ${!nickname ? "Delete the bot's nickname successfully" : `rename bot's nickname to: ${nickname}`}`);
     });
   }
   
@@ -278,13 +280,13 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       };
       let uploadImageToFb = await api.httpPostFormData(`https://www.facebook.com/profile/picture/upload/?profile_id=${botID}&photo_source=57&av=${botID}`, form0);
       uploadImageToFb = JSON.parse(uploadImageToFb.split("for (;;);")[1]);
-      if (uploadImageToFb.error) return reply("an error occurred. please try again later : " + uploadImageToFb.error.errorDescription);
+      if (uploadImageToFb.error) return reply("Error! An error occurred. Please try again later: " + uploadImageToFb.error.errorDescription);
       const idPhoto = uploadImageToFb.payload.fbid;
       const form = {
         av: botID,
   			fb_api_req_friendly_name: "ProfileCometProfilePictureSetMutation",
   			fb_api_caller_class: "RelayModern",
-  			doc_id: "5066134240065849",
+  			doc_id: "100037743553265",
   			variables: JSON.stringify({
           input: {
             caption: "",
@@ -310,8 +312,8 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       };
       api.httpPost("https://www.facebook.com/api/graphql/", form, (e, i) => {
         if (e) reply(`An error occurred, please try again later`);
-        else if (JSON.parse(i.slice(0, i.indexOf('\n') + 1)).errors) reply(`an error occurred. please try again later : ${JSON.parse(i).errors[0].description}`);
-        else reply(`changed avatar for bot successfully`);
+        else if (JSON.parse(i.slice(0, i.indexOf('\n') + 1)).errors) reply(`Error! An error occurred. Please try again later: ${JSON.parse(i).errors[0].description}`);
+        else reply(`Changed avatar for bot successfully`);
       });
     }
     catch(err) {
@@ -321,7 +323,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
   
   
   else if (type == 'blockUser') {
-    if (!body) return reply("please enter the uid of the people you want to block on messenger, you can enter multiple ids separated by space or newline", (e, info) => {
+    if (!body) return reply("Please enter the uid of the people you want to block on messenger, you can enter multiple ids separated by space or newline", (e, info) => {
       global.client.handleReply.push({
         name: this.config.name,
         messageID: info.messageID,
@@ -341,12 +343,12 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         failed.push(uid);
       }
     }
-    reply(`successfully blocked ${success.length} users on messenger${failed.length > 0 ? `\n» Block failure ${failed.length} user, id: ${failed.join(" ")}` : ""}`);
+    reply(`» Successfully blocked ${success.length} users on messenger${failed.length > 0 ? `\n» Block failure ${failed.length} user, id: ${failed.join(" ")}` : ""}`);
   }
   
   
   else if (type == 'unBlockUser') {
-    if (!body) return reply("please enter uid of the people you want to unblock on messenger, you can enter multiple ids separated by space or newline", (e, info) => {
+    if (!body) return reply("Please enter uid of the people you want to unblock on messenger, you can enter multiple ids separated by space or newline", (e, info) => {
       global.client.handleReply.push({
         name: this.config.name,
         messageID: info.messageID,
@@ -366,12 +368,12 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         failed.push(uid);
       }
     }
-    reply(`unblocked successfully ${success.length} users on messenger${failed.length > 0 ? `\n» Unblock failure ${failed.length} user, id: ${failed.join(" ")}` : ""}`);
+    reply(`» Unblocked successfully ${success.length} users on messenger${failed.length > 0 ? `\n» Unblock failure ${failed.length} user, id: ${failed.join(" ")}` : ""}`);
   }
   
   
   else if (type == 'createPost') {
-    if (!body) return reply("please enter the content you want to create the article", (e, info) => {
+    if (!body) return reply("Please enter the content you want to create the article", (e, info) => {
       global.client.handleReply.push({
         name: this.config.name,
         messageID: info.messageID,
@@ -385,7 +387,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       av: botID,
       fb_api_req_friendly_name: "ComposerStoryCreateMutation",
       fb_api_caller_class: "RelayModern",
-      doc_id: "4612917415497545",
+      doc_id: "100017985245260",
       variables: JSON.stringify({
         "input": {
           "composer_entry_point": "inline_composer",
@@ -447,16 +449,16 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
     };
 
     api.httpPost('https://www.facebook.com/api/graphql/', form, (e, i) => {
-      if (e || JSON.parse(i).errors) return reply(`post creation failed, please try again later`);
+      if (e || JSON.parse(i).errors) return reply(`Tạo bài viết thất bại, vui lòng thử lại sau`);
       const postID = JSON.parse(i).data.story_create.story.legacy_story_hideable_id;
       const urlPost = JSON.parse(i).data.story_create.story.url;
-      return reply(`post created successfully\npost id : ${postID}\npost link : ${urlPost}`);
+      return reply(`» Post created successfully\n» postID: ${postID}\n» urlPost: ${urlPost}`);
     });
   }
   
   
   else if (type == 'choiceIdCommentPost') {
-    if (!body) return reply('please enter the id of the post you want to comment on', (e, info) => {
+    if (!body) return reply('Please enter the id of the post you want to comment on', (e, info) => {
       global.client.handleReply.push({
         name: this.config.name,
         messageID: info.messageID,
@@ -465,7 +467,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         isGroup: handleReply.isGroup
       });
     })
-    reply("reply to this message with the content you want to comment on the post", (e, info) => {
+    reply("Reply to this message with the content you want to comment on the post", (e, info) => {
       global.client.handleReply.push({
         name: this.config.name,
         messageID: info.messageID,
@@ -481,7 +483,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
   else if (type == 'commentPost') {
     const { postIDs, isGroup } = handleReply;
     
-    if (!body) return reply('please enter the content you want to comment on the post', (e, info) => {
+    if (!body) return reply('Please enter the content you want to comment on the post', (e, info) => {
       global.client.handleReply.push({
         name: this.config.name,
         messageID: info.messageID,
@@ -546,7 +548,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         failed.push(id);
       }
     }
-    reply(`successfully commented ${success.length} posts${failed.length > 0 ? `\ncomment failed ${failed.length} posts, postID: ${failed.join(" ")}` : ""}`);
+    reply(`» Successfully commented ${success.length} posts${failed.length > 0 ? `\n» Comment failed ${failed.length} posts, postID: ${failed.join(" ")}` : ""}`);
   }
   
   
@@ -563,7 +565,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         })).data;
   		}
   		catch (err) {
-  		  reply("an error occurred, the post id does not exist or you are not the owner of this article");
+  		  reply("An error occurred, the post id does not exist or you are not the owner of this article");
   		}
       
       const session_ID = decodeURIComponent(res.split('session_id%22%3A%22')[1].split('%22%2C%22')[0]);
@@ -601,12 +603,12 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
   			failed.push(postID);
   		};
     }
-    reply(`deleted successfully ${success.length} posts ${failed.length > 0 ? `\ndelete failed ${failed.length} posts, postID: ${failed.join(" ")}` : ""}`);
+    reply(`» Deleted successfully ${success.length} posts${failed.length > 0 ? `\n»Delete failed ${failed.length} posts, postID: ${failed.join(" ")}` : ""}`);
   }
   
   
   else if (type == 'choiceIdReactionPost') {
-    if (!body) return reply(`please enter the post id you want to react to`, (e, info) => {
+    if (!body) return reply(`Please enter the post id you want to react to`, (e, info) => {
       global.client.handleReply.push({
         name: this.config.name,
         messageID: info.messageID,
@@ -617,7 +619,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
     
     const listID = body.replace(/\s+/g, " ").split(" ");
     
-    reply(`enter the emotion you want to react to ${listID.length} posts (unlike/like/love/heart/haha/wow/sad/angry)`, (e, info) => {
+    reply(`Enter the emotion you want to react to ${listID.length} posts (unlike/like/love/heart/haha/wow/sad/angry)`, (e, info) => {
       global.client.handleReply.push({
         name: this.config.name,
         messageID: info.messageID,
@@ -634,7 +636,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
     const failed = [];
     const postIDs = handleReply.listID;
     const feeling = body.toLowerCase();
-    if (!'unlike/like/love/heart/haha/wow/sad/angry'.split('/').includes(feeling)) return reply('please choose one of the following emotions unlike/like/love/heart/haha/wow/sad/angry', (e, info) => {
+    if (!'unlike/like/love/heart/haha/wow/sad/angry'.split('/').includes(feeling)) return reply('Please choose one of the following emotions unlike/like/love/heart/haha/wow/sad/angry', (e, info) => {
       global.client.handleReply.push({
         name: this.config.name,
         messageID: info.messageID,
@@ -652,7 +654,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         failed.push(postID);
       }
     }
-    reply(`released emotions ${feeling} give ${success.length} successful post${failed.length > 0 ? `reaction failed ${failed.length} posts, postID: ${failed.join(" ")}` : ''}`);
+    reply(`» Released emotions ${feeling} give ${success.length} successful post${failed.length > 0 ? `» Reaction failed ${failed.length} posts, postID: ${failed.join(" ")}` : ''}`);
   }
   
   
@@ -688,7 +690,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         failed.push(uid);
       };
     }
-    reply(`friend request has been sent successfully to ${success.length} id${failed.length > 0 ? `\nsend a friend request to ${failed.length} id failure: ${failed.join(" ")}` : ""}`);
+    reply(`» Friend request has been sent successfully to ${success.length} id${failed.length > 0 ? `\n» Send a friend request to ${failed.length} id failure: ${failed.join(" ")}` : ""}`);
   }
   
   
@@ -736,7 +738,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         failed.push(idUnfriend);
       };
     }
-    reply(`deleted successfully ${success.length} friend${failed.length > 0 ? `\ndelete failed ${failed.length} friend:\n${failed.join("\n")}` : ""}`);
+    reply(`» Deleted successfully ${success.length} friend${failed.length > 0 ? `\n» Delete failed ${failed.length} friend:\n${failed.join("\n")}` : ""}`);
   }
   
   
@@ -754,7 +756,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         failed.push(uid);
       }
     }
-    reply(`message sent successfully to ${success.length} user${failed.length > 0 ? `\nsend a message to ${failed.length} user failed : ${failed.join(" ")}` : ""}`);
+    reply(`» Message sent successfully to ${success.length} user${failed.length > 0 ? `\n» Send a message to ${failed.length} user failed: ${failed.join(" ")}` : ""}`);
   }
   
   
@@ -790,7 +792,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
         failed.push(uid);
       }
     }
-    reply(`already ${type == 'acceptFriendRequest' ? 'accept' : 'erase'} successful friend request of ${success.length} id${failed.length > 0 ? `\nfail with ${failed.length} id : ${failed.join(" ")}` : ""}`);
+    reply(`» Is already ${type == 'acceptFriendRequest' ? 'accept' : 'erase'} successful friend request of ${success.length} id${failed.length > 0 ? `\n» Fail with ${failed.length} id: ${failed.join(" ")}` : ""}`);
   }
   
   
@@ -805,7 +807,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
       reply(`Create a successful note, link: ${'https://buildtool.dev/code-viewer.php?' + href}`)
     })
     .catch(err => {
-      reply('an error occurred, please try again later');
+      reply('An error occurred, please try again later');
     })
   }
 };
@@ -814,29 +816,33 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
 module.exports.run = async ({ event, api }) => {
   const { threadID, messageID, senderID } = event;
   
-  api.sendMessage("command list\n"
-     + "\n01. edit bot bio"
-     + "\n02. edit bot nicknames"
-     + "\n03. view pending messages"
-     + "\n04. view unread messages"
-     + "\n05. view spam messages"
-     + "\n06. change bot profile picture"
-     + "\n07. turn on the bot avatar shield (on/off)"
-     + "\n08. block users (messenger)"
-     + "\n09. unblock users (messenger)"
-     + "\n10. create post"
-     + "\n11. delete post"
-     + "\n12. delete post (user)"
-     + "\n13. comment the post (group)"
-     + "\n14. drop post feelings"
-     + "\n15. make friends by id"
-     + "\n16. accept friend request by id"
-     + "\n17. decline friend request by id"
-     + "\n18. delete friends by id"
-     + "\n19. send a message by id"
-     + "\n20. make notes on buildtool.dev"
-     + "\n21. log out of your account"
-    + `\n\nplease reply to this message with the order number you want to execute`, threadID, (err, info) => {
+  api.sendMessage("⚙️⚙️─꯭─⃝‌‌𝐒𝐡𝐚𝐡𝐚𝐝𝐚𝐭 𝐂𝐡𝐚𝐭 𝐁𝐨𝐭 Command List ⚙️⚙️"
+     + "\n[01] Edit bot bio"
+     + "\n[02] Edit bot nicknames"
+     + "\n[03] View pending messages"
+     + "\n[04] View unread messages"
+     + "\n[05] View spam messages"
+     + "\n[06] Change bot avatar"
+     + "\n[07] Turn on the bot avatar shield <on/off>"
+     + "\n[08] Block users (messenger)"
+     + "\n[09] Unblock users (messenger)"
+     + "\n[10] Create post"
+     + "\n[11] Delete post"
+     + "\n[12] Delete post (user)"
+     + "\n[13] Comment the post (group)"
+     + "\n[14] Drop post feelings"
+     + "\n[15] Make friends by id"
+     + "\n[16] Accept friend request by id"
+     + "\n[17] Decline friend request by id"
+     + "\n[18] Delete friends by id"
+     + "\n[19] Send a message by id"
+     + "\n[20] Make notes on buildtool.dev"
+     + "\n[21] Log out of your account"
+    + "\n````````````````````````````````"
+    + `\n» Admin ID:\n${global.config.ADMINBOT.join("\n")}`
+    + `\n» Bot ID: ${api.getCurrentUserID()}`
+    + `\n» Please reply to this message with the order number you want to execute`
+    + "\n````````````````````````````````", threadID, (err, info) => {
     global.client.handleReply.push({
       name: this.config.name,
       messageID: info.messageID,
@@ -856,6 +862,8 @@ function getGUID() {
             let b = (info == 'x' ? a : a & 7 | 8).toString(16);
             return b;
         });
+  console.log(r)
     return r;
 }
 getGUID()
+////muhahhahahaha encode cái dmm

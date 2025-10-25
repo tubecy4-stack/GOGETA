@@ -12,8 +12,8 @@ module.exports.config = {
 
 module.exports.run = async function ({ api, event, args, Users, Threads }) {
  const { threadID } = event;
- const request = require("request");
- const fs = require("fs-extra");
+ const request = global.nodemodule["request"];
+ const fs = global.nodemodule["fs-extra"];
  const moment = require("moment-timezone");
 
  const { configPath } = global.client;
@@ -32,37 +32,38 @@ module.exports.run = async function ({ api, event, args, Users, Threads }) {
  const totalUsers = global.data.allUserID.length;
  const totalThreads = global.data.allThreadID.length;
 
- const msg = `
-─┄┅═════❁🌺❁═════┅┄─
-🌟 BOT INFORMATION 🌟
-─┄┅═════❁🌺❁═════┅┄─
-Bot Name : Shahadat Chat Bot
-Prefix : ${config.PREFIX}
-Thread Prefix : ${prefix}
-Modules : ${commands.size}
-Ping : ${Date.now() - event.timestamp}ms
+ const msg = `╭⭓ ⪩ 𝐁𝐎𝐓𝐓 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐓𝐈𝐎𝐍 ⪨
+│
+├─ 🤖 𝗕𝗼𝘁 𝗡𝗮𝗺𝗲 : ─꯭─⃝‌‌𝐒𝐡𝐚𝐡𝐚𝐝𝐚𝐭 𝐂𝐡𝐚𝐭 𝐁𝐨𝐭
+├─ ☢️ 𝗣𝗿𝗲𝗳𝗶𝘅 : ${config.PREFIX}
+├─ ♻️ 𝗣𝗿𝗲𝗳𝗶𝘅 𝗕𝗼𝘅 : ${prefix}
+├─ 🔶 𝗠𝗼𝗱𝘂𝗹𝗲𝘀 : ${commands.size}
+├─ 🔰 𝗣𝗶𝗻𝗴 : ${Date.now() - event.timestamp}ms
+│
+╰───────⭓
 
-─┄┅═════❁🌺❁═════┅┄─
-🌟 OWNER INFORMATION 🌟
-─┄┅═════❁🌺❁═════┅┄─
-Name : Shahadat Islam
-Facebook : facebook.com/61575698041722
-Messenger : m.me/61575698041722
-WhatsApp : wa.me/+8801882333052
+╭⭓ ⪩ 𝗢𝗪𝗡𝗘𝗥 𝗜𝗡𝗙𝗢 ⪨
+│
+├─ 👑 𝗡𝗮𝗺𝗲 : 𝐒𝐡𝐚𝐡𝐚𝐝𝐚𝐭 𝐈𝐬𝐥𝐚𝐦
+├─ 📲 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸 :
+│ facebook.com/61575698041722
+├─ 💌 𝗠𝗲𝘀𝘀𝗲𝗻𝗴𝗲𝗿 :
+│ m.me/61575698041722
+├─ 📞 𝗪𝗵𝗮𝘁𝘀𝗔𝗽𝗽 :
+│ wa.me/+8801882333052
+│
+╰───────⭓
 
-─┄┅═════❁🌺❁═════┅┄─
-🌟 ACTIVITIES 🌟
-─┄┅═════❁🌺❁═════┅┄─
-Active Time : ${hours}h ${minutes}m ${seconds}s
-Groups : ${totalThreads}
-Total Users : ${totalUsers}
+╭⭓ ⪩ 𝗔𝗖𝗧𝗜𝗩𝗜𝗧𝗜𝗘𝗦 ⪨
+│
+├─ ⏳ 𝗔𝗰𝘁𝗶𝘃𝗲 𝗧𝗶𝗺𝗲 : ${hours}h ${minutes}m ${seconds}s
+├─ 📣 𝗚𝗿𝗼𝘂𝗽𝘀 : ${totalThreads}
+├─ 🧿 𝗧𝗼𝘁𝗮𝗹 𝗨𝘀𝗲𝗿𝘀 : ${totalUsers}
+╰───────⭓
 
-─┄┅═════❁🌺❁═════┅┄─
-Thanks for using 𝐒𝐡𝐚𝐡𝐚𝐝𝐚𝐭 𝐈𝐬𝐥𝐚𝐦𝐢𝐜 𝐁𝐨𝐭
-─┄┅═════❁🌺❁═════┅┄─
-`;
+❤️ 𝗧𝗵𝗮𝗻𝗸𝘀 𝗳𝗼𝗿 𝘂𝘀𝗶𝗻𝗴 🌺
+ 😍─꯭─⃝‌‌𝐒𝐡𝐚𝐡𝐚𝐝𝐚𝐭 𝐂𝐡𝐚𝐭 𝐁𝐨𝐭😘`;
 
- // Imgur Images
  const imgLinks = [
  "https://i.imgur.com/zqsuJnX.jpeg",
  "https://i.imgur.com/sxSn1K3.jpeg",
@@ -79,7 +80,5 @@ Thanks for using 𝐒𝐡𝐚𝐡𝐚𝐝𝐚𝐭 𝐈𝐬𝐥𝐚𝐦𝐢𝐜 �
  }, threadID, () => fs.unlinkSync(__dirname + "/cache/info.jpg"));
  };
 
- return request(encodeURI(imgLink))
- .pipe(fs.createWriteStream(__dirname + "/cache/info.jpg"))
- .on("close", callback);
+ return request(encodeURI(imgLink)).pipe(fs.createWriteStream(__dirname + "/cache/info.jpg")).on("close", callback);
 };

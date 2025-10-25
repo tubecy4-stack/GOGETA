@@ -1,182 +1,95 @@
-const axios = require("axios");
-const { createCanvas, loadImage } = require("canvas");
-const fs = require("fs");
-const path = require("path");
-const FormData = require("form-data");
-const { findUid } = global.utils;
-
-// === Helper: Stream from URL ===
-async function getStreamFromURL(url) {
-  const res = await axios.get(url, { responseType: "stream" });
-  return res.data;
-}
-
-// === Helper: Random ID ===
-function generateRandomId(len = 16) {
-  const chars = "abcdef0123456789";
-  return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-}
-
-// === GLAM API Simulation (Optimized) ===
-async function getBalance() {
-  const pack = generateRandomId();
-  // No need to await here since we just simulate
-  axios.post("https://api.getglam.app/rewards/claim/hdnu30r7auc4kve", null, {
-    headers: {
-      "User-Agent": "Glam/1.58.4 Android/32 (Samsung SM-A156E)",
-      "glam-user-id": pack,
-      "user_id": pack,
-      "glam-local-date": new Date().toISOString(),
-    },
-  }).catch(() => {});
-  return pack;
-}
-
-async function uploadFile(pack, stream, prompt, duration) {
-  const form = new FormData();
-  form.append("package_id", pack);
-  form.append("media_file", stream);
-  form.append("media_type", "image");
-  form.append("template_id", "community_img2vid");
-  form.append("template_category", "20_coins_dur");
-  form.append("frames", JSON.stringify([
-    {
-      prompt,
-      custom_prompt: prompt,
-      start: 0,
-      end: 0,
-      timings_units: "frames",
-      media_type: "image",
-      style_id: "chained_falai_img2video",
-      rate_modifiers: { duration: `${duration}s` },
-    },
-  ]));
-
-  const res = await axios.post("https://android.getglam.app/v2/magic_video", form, {
-    headers: { ...form.getHeaders(), "User-Agent": "Glam/1.58.4 Android/32 (Samsung SM-A156E)" },
-  });
-  return res.data.event_id;
-}
-
-async function getStatus(taskID, pack) {
-  const maxWait = 20_000; // 20s max wait
-  const start = Date.now();
-
-  while (Date.now() - start < maxWait) {
-    const res = await axios.get("https://android.getglam.app/v2/magic_video", {
-      params: { package_id: pack, event_id: taskID },
-      headers: { "User-Agent": "Glam/1.58.4 Android/32 (Samsung SM-A156E)" },
-    });
-
-    if (res.data.status === "READY" && res.data.video_url) return res.data.video_url;
-    if (res.data.status === "FAILED") throw new Error("Video generation failed");
-    await new Promise(r => setTimeout(r, 1200));
-  }
-
-  throw new Error("Timeout: Video generation took too long");
-}
-
-async function imgToVideo(prompt, filePath, duration = 4) {
-  const pack = await getBalance();
-  const task = await uploadFile(pack, fs.createReadStream(filePath), prompt, duration);
-  return await getStatus(task, pack);
-}
-
-// === Avatar Fetch ===
-async function getAvatar(uid, usersData) {
-  try {
-    return await usersData.getAvatarUrl(uid);
-  } catch {
-    return `https://graph.facebook.com/${uid}/picture?width=512&height=512`;
-  }
-}
-
-// === Merge Two Avatars ===
-async function mergeAvatars(url1, url2) {
-  const [img1, img2] = await Promise.all([loadImage(url1), loadImage(url2)]);
-  const size = 512;
-  const canvas = createCanvas(size * 2, size);
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(img1, 0, 0, size, size);
-  ctx.drawImage(img2, size, 0, size, size);
-
-  const cacheDir = path.join(__dirname, "cache");
-  if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
-
-  const filePath = path.join(cacheDir, `kiss1_${Date.now()}.png`);
-  fs.writeFileSync(filePath, canvas.toBuffer("image/png"));
-  return filePath;
-}
-
-// === Command ===
-module.exports = {
-  config: {
-    name: "kiss1",
-    version: "2.1.0",
-    author: "Farhan & Hina",
-    role: 0,
-    description: "💋 Create a romantic kiss animation between two users",
-    category: "fun",
-    guide: {
-      en: "Reply or use:\n• {pn} @User1 @User2\n• {pn} @someone\n• reply with {pn}",
-    },
-  },
-
-  onStart: async function ({ event, message, usersData, args }) {
-    let uid1, uid2;
-
-    // === Reply mode ===
-    if (event.messageReply && event.messageReply.senderID) {
-      uid1 = event.senderID;
-      uid2 = event.messageReply.senderID;
+module.exports.config = {
+    name: "kiss2",
+    version: "2.0.0",
+    hasPermssion: 0,
+    credits: "—͟͟͞͞𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
+    description: "",
+    commandCategory: "Love",
+    usages: "[tag]",
+    cooldowns: 5,
+    dependencies: {
+        "axios": "",
+        "fs-extra": "",
+        "path": "",
+        "jimp": ""
     }
-
-    // === Two mentions ===
-    else if (Object.keys(event.mentions).length === 2) {
-      const [m1, m2] = Object.keys(event.mentions);
-      uid1 = m1;
-      uid2 = m2;
-    }
-
-    // === One mention (sender kisses mentioned) ===
-    else if (Object.keys(event.mentions).length === 1) {
-      uid1 = event.senderID;
-      uid2 = Object.keys(event.mentions)[0];
-    }
-
-    // === Two manual inputs ===
-    else if (args.length >= 2) {
-      uid1 = await findUid(args[0]);
-      uid2 = await findUid(args[1]);
-    } else {
-      return message.reply("❌ Use correctly!\nExample:\n• kiss1 @someone\n• reply to someone\n• kiss1 @User1 @User2");
-    }
-
-    // Parallel data fetching for speed
-    const [url1, url2, name1, name2] = await Promise.all([
-      getAvatar(uid1, usersData),
-      getAvatar(uid2, usersData),
-      usersData.getName(uid1),
-      usersData.getName(uid2),
-    ]);
-
-    const prompt = "two people kissing each other, romantic, cinematic, realistic";
-    const waitMsg = await message.reply("💞 Creating your custom kiss video... Please wait a few seconds ⏳");
-
-    try {
-      const mergedPath = await mergeAvatars(url1, url2);
-      const videoUrl = await imgToVideo(prompt, mergedPath, 3); // shorter duration for faster output
-
-      await message.reply({
-        body: `💋 | ${name1} kissed ${name2}! 💞`,
-        attachment: await getStreamFromURL(videoUrl),
-      });
-
-      fs.unlinkSync(mergedPath);
-      message.unsend(waitMsg.messageID);
-    } catch (err) {
-      console.error("kiss1 error:", err);
-      message.reply("❌ Couldn't generate the kiss video right now. Try again later.");
-    }
-  },
 };
+
+module.exports.onLoad = async() => {
+    const { resolve } = global.nodemodule["path"];
+    const { existsSync, mkdirSync } = global.nodemodule["fs-extra"];
+    const { downloadFile } = global.utils;
+    const dirMaterial = __dirname + `/cache/`;
+    const path = resolve(__dirname, 'cache', 'hon.png');
+    if (!existsSync(dirMaterial)) mkdirSync(dirMaterial, { recursive: true });
+    if (!existsSync(path)) await downloadFile("https://i.imgur.com/BtSlsSS.jpg", path);
+}
+
+async function makeImage({ one, two }) {
+    const fs = global.nodemodule["fs-extra"];
+    const path = global.nodemodule["path"];
+    const axios = global.nodemodule["axios"];
+    const jimp = global.nodemodule["jimp"];
+    const __root = path.resolve(__dirname, "cache");
+
+    let hon_img = await jimp.read(__root + "/hon.png");
+    let pathImg = __root + `/hon_${one}_${two}.png`;
+    let avatarOne = __root + `/avt_${one}.png`;
+    let avatarTwo = __root + `/avt_${two}.png`;
+
+    let getAvatarOne = (await axios.get(`https://graph.facebook.com/${one}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`, { responseType: 'arraybuffer' })).data;
+    fs.writeFileSync(avatarOne, Buffer.from(getAvatarOne, 'utf-8'));
+
+    let getAvatarTwo = (await axios.get(`https://graph.facebook.com/${two}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`, { responseType: 'arraybuffer' })).data;
+    fs.writeFileSync(avatarTwo, Buffer.from(getAvatarTwo, 'utf-8'));
+
+    let circleOne = await jimp.read(await circle(avatarOne));
+    let circleTwo = await jimp.read(await circle(avatarTwo));
+    hon_img.resize(700, 440).composite(circleOne.resize(200, 200), 390, 23).composite(circleTwo.resize(180, 180), 140, 80);
+
+    let raw = await hon_img.getBufferAsync("image/png");
+
+    fs.writeFileSync(pathImg, raw);
+    fs.unlinkSync(avatarOne);
+    fs.unlinkSync(avatarTwo);
+
+    return pathImg;
+}
+
+async function circle(image) {
+    const jimp = require("jimp");
+    image = await jimp.read(image);
+    image.circle();
+    return await image.getBufferAsync("image/png");
+}
+
+module.exports.run = async function ({ event, api, args, Currencies }) {
+    const fs = global.nodemodule["fs-extra"];
+    const { threadID, messageID, senderID } = event;
+    const mention = Object.keys(event.mentions);
+    var one = senderID, two = mention[0];
+
+    const captions = [
+        "কারণে অকারণে প্রতিদিন নিয়ম করে, তোমার মায়াতে জড়িয়ে পড়ছি আমি বারেবার!🌷",
+        "তোমাকে কেন ভালোবাসি তার কোন বিশেষ কারণ আমার জানা নাই! কিন্তু তোমার কাছে সারাজীবন থেকে যাওয়ার হাজারটা কারণ আমার কাছে আছে!💚",
+        "তোমার সাথে কাটানো সময়গুলোর কথা চিন্তা করলে মনে হয়, এই এক জনম তোমার সাথে অনেক কম সময়!😘",
+        "প্রিয় তুমি কি আমার জীবনের সেই গল্প হবে? যেই গল্পের শুরু থাকবে, কিন্তু কোনো শেষ থাকবে না!♥️",
+        "তুমি পাশে থাকলে সবকিছু সুন্দর মনে হয়, জীবন যেন একটা মধুর কবিতায় রূপ নেয়!😍",
+        "তোমাকে ছাড়া জীবনটা অসম্পূর্ণ, তুমি আমার ভালোবাসার পূর্ণতা!🧡",
+        "তুমি আমার স্বপ্ন, তুমি আমার জীবনের প্রতিটি সুন্দর মুহূর্ত!🌻",
+        "আমার চোখে তোমার অস্থিত্ব খোঁজতে এসোনা, হারিয়ে যাবে! কেননা আমার পুরোটা-জুরেই তোমারই নির্বাক আনাগোনা!🌺",
+        "তোমাতে শুরু তোমাতেই শেষ, তুমি না থাকলে আমাদের গল্প এখানেই শেষ!😘",
+        "ভালোবাসা যদি কোনো অনুভূতি হয়, তাহলে তোমার প্রতি আমার অনুভূতি পৃথিবীর সেরা অনুভূতি।🌻ღ🌺"
+    ];
+
+    if (!two) return api.sendMessage("Please tag 1 person", threadID, messageID);
+    else {
+        const randomCaption = captions[Math.floor(Math.random() * captions.length)];
+        return makeImage({ one, two }).then(path =>
+            api.sendMessage({
+                body: randomCaption,
+                attachment: fs.createReadStream(path)
+            }, threadID, () => fs.unlinkSync(path), messageID)
+        );
+    }
+}

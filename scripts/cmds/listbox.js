@@ -71,7 +71,7 @@ module.exports.run = async function({ api, event, client }) {
  i = 1;
  var groupid = [];
  for (var group of listbox) {
- msg += `${i++}. ${group.name}\n🌺TID: ${group.id}\n🌸Member: ${group.sotv}\n\n`;
+ msg += `${i++}. ${group.name}\n🧩TID: ${group.id}\n🐸Member: ${group.sotv}\n\n`;
  groupid.push(group.id);
  }
 

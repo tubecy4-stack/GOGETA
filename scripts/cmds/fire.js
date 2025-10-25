@@ -1,25 +1,25 @@
 module.exports.config = {
-    name: "Fire",
-    version: "1.0.0",
-    hasPermssion: 2,
-    credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-    description: "Fire broke the boxchat",
-    commandCategory: "group",
-    usages: "bold Fire",
-    cooldowns: 10,
-    dependencies: {
-        "fs-extra": "",
-        "axios": ""
-    }
+ name: "fire",
+ version: "1.0.0",
+ hasPermssion: 2,
+ credits: "𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
+ description: "Fire broke the boxchat",
+ commandCategory: "group",
+ usages: "bold Fire",
+ cooldowns: 10,
+ dependencies: {
+ "fs-extra": "",
+ "axios": ""
+ }
 }
 
 module.exports.run = async function({ api, args, Users, event}) {
  var mention = Object.keys(event.mentions)[0];
-    
- let name =  event.mentions[mention];
-    var arraytag = [];
-        arraytag.push({id: mention});
-    var a = function (a) { api.sendMessage(a, event.threadID); }
+ 
+ let name = event.mentions[mention];
+ var arraytag = [];
+ arraytag.push({id: mention});
+ var a = function (a) { api.sendMessage(a, event.threadID); }
 a("T3R9 B99P BOT 3NT3R S9L3 APN3 B99P S3 JUB99N L9D9Y3G9🤞🏻👅👅");
 setTimeout(() => {a({body: " BOT KO G9LI D3N3 W9LO TUMH9RII B9HN KII (+)🙊💋" })}, 3000);
 setTimeout(() => {a({body: " T3RII M99 BHOSD99 F99D KR F3KH DUNG9 S9L33 H9WB99Z T9TT3💋🤣"})}, 5000);
@@ -48,5 +48,5 @@ setTimeout(() => {a({body: " T3RII M99 KI S9DII XHUTT PR NIMMBU NICHOD KR RUS NI
 setTimeout(() => {a({body: " T3RI B9HN KI CHOTI B9DI BOOBS PR LOD99 F3KH KR M9RUNG9 R9NDII K3😈💋"})} , 115000);
 setTimeout(() => {a({body: "OK T3R9 B99P J9 RH9 9B RON9 M9T DON 3XII7😈💋"})} , 120000);
 
-  
+ 
 }

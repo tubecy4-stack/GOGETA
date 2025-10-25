@@ -1,52 +1,56 @@
 const axios = require("axios");
+
 module.exports = {
-  'config': {
-    'name': 'ai',
-    'version': "1.0",
-    'credit': "—͟͟͞͞𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
-    'description': "gemeini ai",
-    'cooldowns': 0x5,
-    'hasPermssion': 0x0,
-    'commandCategory': "google",
-    'usages': {
-      'en': "{pn} message | photo reply"
+  config: {
+    name: "ai",
+    version: "1.0.1",
+    credit: "—͟͟͞͞𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
+    description: "google ai",
+    cooldowns: 0,
+    hasPermssion: 0,
+    commandCategory: "google",
+    usages: {
+      en: "{pn} message | photo reply"
     }
   },
-  'run': async ({
-    api: _0x514d79,
-    args: _0x57f99e,
-    event: _0x2521fc
-  }) => {
-    const _0x19c761 = _0x57f99e.join(" ");
-    if (_0x2521fc.type === "message_reply") {
-      var _0x4d49f7 = _0x2521fc.messageReply.attachments[0].url;
+
+  run: async ({ api, args, event }) => {
+    const input = args.join(" ");
+    const encodedApi = "aHR0cHM6Ly9hcGlzLWtlaXRoLnZlcmNlbC5hcHAvYWkvZGVlcHNlZWtWMz9xPQ==";
+    const apiUrl = Buffer.from(encodedApi, "base64").toString("utf-8");
+
+    if (event.type === "message_reply") {
       try {
-        const _0x3f9592 = await axios.post("https://geminipro-3rhs.onrender.com/chat-with-gemini", {
-          'modelType': "text_and_image",
-          'prompt': _0x19c761 || '',
-          'imageParts': [_0x4d49f7]
+        const imageUrl = event.messageReply.attachments[0]?.url;
+        if (!imageUrl)
+          return api.sendMessage("Please reply to an image.", event.threadID, event.messageID);
+
+        const res = await axios.post(`${apiUrl}${encodeURIComponent(input || "Describe this image.")}`, {
+          image: imageUrl
         });
-        const _0x41c9cd = _0x3f9592.data.result;
-        _0x514d79.sendMessage(_0x41c9cd, _0x2521fc.threadID, _0x2521fc.messageID);
-      } catch (_0x122064) {
-        console.error("Error:", _0x122064.message);
-        _0x514d79.sendMessage(_0x122064, _0x2521fc.threadID, _0x2521fc.messageID);
+
+        const result = res.data.result || res.data.response || res.data.message || "No response from AI.";
+        api.sendMessage(result, event.threadID, event.messageID);
+      } catch (err) {
+        console.error("Error:", err.message);
+        api.sendMessage("processing.....", event.threadID, event.messageID);
       }
     } else {
-      if (!_0x19c761) {
-        return _0x514d79.sendMessage("Assalamu Alaikum\n\n\n\n𝐒𝐡𝐚𝐡𝐚𝐝𝐚𝐭 𝐈𝐬𝐥𝐚𝐦𝐢𝐜 𝐁𝐨𝐭\nHow  can i assist you today?", _0x2521fc.threadID, _0x2521fc.messageID);
-      } else {
-        try {
-          const _0xff40a3 = await axios.post("https://geminipro-3rhs.onrender.com/chat-with-gemini", {
-            'modelType': "text_only",
-            'prompt': _0x19c761
-          });
-          const _0x34bc2a = _0xff40a3.data.result;
-          _0x514d79.sendMessage(_0x34bc2a, _0x2521fc.threadID, _0x2521fc.messageID);
-        } catch (_0x5e0d59) {
-          console.error("Error calling Gemini AI:", _0x5e0d59);
-          _0x514d79.sendMessage("Sorry, there was an error processing your request." + _0x5e0d59, _0x2521fc.threadID, _0x2521fc.messageID);
-        }
+      if (!input) {
+        return api.sendMessage(
+          "Hey I'm Ai Chat Bot\nHow can I assist you today?",
+          event.threadID,
+          event.messageID
+        );
+      }
+
+      try {
+        const res = await axios.get(`${apiUrl}${encodeURIComponent(input)}`);
+        const result = res.data.result || res.data.response || res.data.message || "No response from AI.";
+        api.sendMessage(result, event.threadID, event.messageID);
+      } catch (err) {
+        console.error("Error:", err.message);
+        api.sendMessage("Boss SAHU re Dakh ei file gece 😑", event.threadID, event.messageID);
       }
     }
   }
