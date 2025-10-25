@@ -1,69 +1,63 @@
-const axios = require("axios");
-const fs = require("fs");
-const path = require("path");
+const axios = require('axios');
+const fs = require('fs');
+
+const xyz = "ArYANAHMEDRUDRO";
 
 module.exports = {
-  config: {
-    name: "4k",
-    aliases: ["remini"],
-    version: "1.2",
-    author: "nexo_here",
-    countDown: 5,
-    role: 0,
-    shortDescription: "Upscale image to 4K",
-    longDescription: "Upscale an image using smfahim.xyz",
-    category: "image",
-    guide: {
-      en: "{pn} [url] or reply to an image"
-    },
-    usePrefix: true
-  },
+ config: {
+ name: "4k",
+ version: "1.0.0",
+ hasPermssion: 0,
+ credits: "—͟͟͞͞𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️ ",
+ premium: false,
+ description: "Enhance Photo - Image Generator",
+ commandCategory: "Image Editing Tools",
+ usages: "Reply to an image or provide image URL",
+ cooldowns: 5,
+ dependencies: {
+ path: "",
+ 'fs-extra': ""
+ }
+ },
 
-  onStart: async function ({ api, event, args }) {
-    let url = null;
+ run: async function({ api, event, args }) {
+ const tempImagePath = __dirname + '/cache/enhanced_image.jpg';
+ const { threadID, messageID } = event;
 
-    // ✅ If user replied to an image
-    if (event.messageReply?.attachments?.[0]?.type === "photo") {
-      url = event.messageReply.attachments[0].url;
-    }
+ const imageUrl = event.messageReply ? 
+ event.messageReply.attachments[0].url : 
+ args.join(' ');
 
-    // ✅ Or used direct image URL
-    if (!url && args[0]?.startsWith("http")) {
-      url = args[0];
-    }
+ if (!imageUrl) {
+ api.sendMessage("Please reply to an image or provide an image URL", threadID, messageID);
+ return;
+ }
 
-    // ❌ If no valid image source
-    if (!url) {
-      return api.sendMessage("❌ Reply to an image or provide a direct image URL.", event.threadID, event.messageID);
-    }
+ try {
+ const processingMsg = await api.sendMessage("𝐏𝐥𝐞𝐚𝐬𝐞 𝐖𝐚𝐢𝐭 𝐁𝐚𝐛𝐲...😘", threadID);
 
-    try {
-      api.setMessageReaction("🔄", event.messageID, () => {}, true);
+ const apiUrl = `https://aryan-xyz-upscale-api-phi.vercel.app/api/upscale-image?imageUrl=${encodeURIComponent(imageUrl)}&apikey=${xyz}`;
 
-      const res = await axios.get(`https://smfahim.xyz/4k?url=${encodeURIComponent(url)}`);
-      if (!res.data?.status || !res.data?.image) {
-        api.setMessageReaction("❌", event.messageID, () => {}, true);
-        return api.sendMessage("⚠️ Upscaling failed. Try another image.", event.threadID, event.messageID);
-      }
+ const enhancementResponse = await axios.get(apiUrl);
+ const enhancedImageUrl = enhancementResponse.data?.resultImageUrl;
 
-      const img = await axios.get(res.data.image, { responseType: "arraybuffer" });
-      const imgPath = path.join(__dirname, "cache", `${event.senderID}_4k.jpg`);
-      fs.writeFileSync(imgPath, Buffer.from(img.data, "binary"));
+ if (!enhancedImageUrl) {
+ throw new Error("Failed to get enhanced image URL.");
+ }
 
-      api.sendMessage(
-        { attachment: fs.createReadStream(imgPath) },
-        event.threadID,
-        () => {
-          fs.unlinkSync(imgPath);
-          api.setMessageReaction("✅", event.messageID, () => {}, true);
-        },
-        event.messageID
-      );
+ const enhancedImage = (await axios.get(enhancedImageUrl, { responseType: 'arraybuffer' })).data;
 
-    } catch (err) {
-      console.error("[4k] Error:", err.message);
-      api.setMessageReaction("❌", event.messageID, () => {}, true);
-      api.sendMessage("❌ Error occurred while processing image.", event.threadID, event.messageID);
-    }
-  }
+ fs.writeFileSync(tempImagePath, Buffer.from(enhancedImage, 'binary'));
+
+ api.sendMessage({
+ body: "✅ 𝐈𝐦𝐚𝐠𝐞 𝐆𝐞𝐧𝐞𝐫𝐚𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐟𝐮𝐥𝐥𝐲!",
+ attachment: fs.createReadStream(tempImagePath)
+ }, threadID, () => fs.unlinkSync(tempImagePath), messageID);
+
+ api.unsendMessage(processingMsg.messageID);
+
+ } catch (error) {
+ api.sendMessage(`❌ Error`, threadID, messageID);
+ }
+ }
 };

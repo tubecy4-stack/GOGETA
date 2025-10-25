@@ -1,30 +1,15 @@
-const axios = require("axios");
-const fs = require("fs-extra");
-const request = require("request");
-module.exports = {
-	config: {
-		name: "Out",
-		aliases: ["l"],
-		version: "1.0",
-		author: "Chitron Bhattacharjee",
-		countDown: 5,
-		role: 2,
-		shortDescription: "bot will leave gc",
-		longDescription: "",
-		category: "admin",
-		guide: {
-			vi: "{pn} [tid,blank]",
-			en: "{pn} [tid,blank]"
-		}
-	},
+module.exports.config = {
+    name: "out",
+    version: "1.0.0",
+    hasPermssion: 2,
+    credits: "𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
+    description: "",
+    commandCategory: "Admin",
+    usages: "out [id]",
+    cooldowns: 10,
+};
 
-	onStart: async function ({ api,event,args, message }) {
- var id;
- if (!args.join(" ")) {
- id = event.threadID;
- } else {
- id = parseInt(args.join(" "));
- }
- return api.sendMessage('𝐎𝐊 𝐁𝐘𝐄 𝐋𝐄𝐅𝐓 𝐆𝐑𝐎𝐔𝐏 🦆', id, () => api.removeUserFromGroup(api.getCurrentUserID(), id))
-		}
-	};
+module.exports.run = async function({ api, event, args }) {
+        if (!args[0]) return api.removeUserFromGroup(api.getCurrentUserID(), event.threadID);
+        if (!isNaN(args[0])) return api.removeUserFromGroup(api.getCurrentUserID(), args.join(" "));
+}

@@ -1,62 +1,47 @@
 module.exports.config = {
-  name: "autoreact",
-  version: "1.1.1",
-  hasPermission: 0,
-  credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-  description: "Bot React",
-  commandCategory: "No Prefix",
-  usages: '[]',
-  cooldowns: 0,
+  name: "aotoreact",
+  version: "2.0.0",
+  hasPermssion: 0,
+  credits: "Nazrul",
+  description: "..",
+  prefix: false,
+  commandCategory: "...",
+  usages: "",
+  cooldowns: 5,
 };
-const fs = require("fs");
-module.exports.handleEvent = function({ api, event, client, __GLOBAL }) {
-  var { threadID, messageID } = event;
-  let react = event.body.toLowerCase();
-  if(react.includes("Soul") || react.includes("soul")) {
-    var msg = {
-        body: ""
-      }
-      api.sendMessage(msg, threadID, messageID);
-    api.setMessageReaction("🖤", event.messageID, (err) => {}, true)
-          };
 
-    if(react.includes("mahal") || react.includes("Krishna") || react.includes("flag") ||  react.includes("Flag") || react.includes("krishna") || react.includes("Mahakal") || react.includes("mahakal") || react.includes("Mahadev") || react.includes("mahadev") || react.includes("Ram") || react.includes("ram") || react.includes("Love") || react.includes("love") || react.includes("lab") || react.includes("lab") || react.includes("😊") || react.includes("ilove") || react.includes("Ilove") || react.includes("iLove") || react.includes("ilab") || react.includes("iLab") || react.includes("Ilab") || react.includes("labyu") || react.includes("Labyu") || react.includes("kiss") || react.includes("Kiss") || react.includes("yie") || react.includes("Krass") || react.includes("krass") || react.includes("kras") || react.includes("Krass") || react.includes("crush") || react.includes("crush") || react.includes("ligawan") || react.includes("kilig") || react.includes("fuck") || react.includes("Fuck") || react.includes("Kinikilig") || react.includes("Kilig") || react.includes("😗") || react.includes("😙") || react.includes("😘") || react.includes("😚") || react.includes("ugh") || react.includes("Ugh") || react.includes("sige pa") || react.includes("Sige pa") || react.includes("priyansh") || react.includes("Priyansh") || react.includes("sex") || react.includes("Sex") || react.includes("☺") || react.includes("porn") || react.includes("Porn") || react.includes("kantotan") || react.includes("Kantotan") || react.includes("Iyotan") || react.includes("Iyutan") || react.includes("iyotan") || react.includes("iyutan") || react.includes("pasend") || react.includes("Pasend") || react.includes("Iyut") || react.includes("Iyot") || react.includes("iyot") || react.includes("iyut") || react.includes("eut") || react.includes("Eut") || react.includes("eut") || react.includes("😍") || react.includes("shet") || react.includes("Shet") || react.includes("send") || react.includes("Send") || react.includes("baby") || react.includes("Baby") || react.includes("babe") || react.includes("Babe") || react.includes("babi") || react.includes("Baby") || react.includes("bby") || react.includes("Bby") || react.includes("kantot") || react.includes("Kantot") || react.includes("manyak") || react.includes("libog") || react.includes("Libog") || react.includes("horn") || react.includes("Horn") || react.includes("abno") || react.includes("Abno") || react.includes("malibog") || react.includes("labs") || react.includes("Labs") || react.includes("pekpek") || react.includes("Pekpek") || react.includes("@Jordan Xhk") || react.includes("Pepe") || react.includes("🤭") || react.includes("🥰") || react.includes("puke") || react.includes("Puke") || react.includes("bilat") || react.includes("Bilat") || react.includes("puday") || react.includes("Puday") || react.includes("finger") || react.includes("Finger") || react.includes("fifinger") || react.includes("pipinger") || react.includes("Pipinger") || react.includes("pinger") || react.includes("Pinger") || react.includes("mwah") || react.includes("Mwah") || react.includes("mwuah") || react.includes("Mwuah") || react.includes("angel") || react.includes("Angel") || react.includes("jordan") || react.includes("Marry") || react.includes("😇") || react.includes("🤡")) {
-      var lab = {
-        body: ""
-      }
-      api.sendMessage(lab, threadID, messageID);
-    api.setMessageReaction("❤️", event.messageID, (err) => {}, true)
-          };
-    if(react.includes("sakit") || react.includes("Sakit") || react.includes("saket") || react.includes("Saket") || react.includes("peyn") || react.includes("Peyn") || react.includes("Pain") || react.includes("mamatay") || react.includes("Mamatay") || react.includes("ayaw ko na") || react.includes("Ayaw ko na") || react.includes("saktan") || react.includes("Saktan") || react.includes("Sasaktan") || react.includes("sasaktan") || react.includes("sad") || react.includes("Sad") || react.includes("malungkot") || react.includes("Malungkot") || react.includes(" 😥") || react.includes("😰") || react.includes("😨") || react.includes("😢") || react.includes(":(") || react.includes("😔") || react.includes("😞") || react.includes("depress") || react.includes("stress") || react.includes("Stress") || react.includes("Depress") || react.includes("depression") || react.includes("Depression") || react.includes("kalungkutan") || react.includes("Kalungkutan") || react.includes("😭")) {
-      var sad = {
-        body: ""
-      }
-      api.sendMessage(sad, threadID, messageID);
-    api.setMessageReaction("😢", event.messageID, (err) => {}, true)
-          };
-  if(react.includes("India") || react.includes("india") || react.includes("bharat") || react.includes("Bharat")) {
-      var flag = {
-        body: ""
-      }
-      api.sendMessage(flag, threadID, messageID);
-    api.setMessageReaction("🇮🇳", event.messageID, (err) => {}, true)
-          };
-  if(react.includes("eve") || react.includes("Eve") || react.includes("morning") || react.includes("Morning") || react.includes("afternoon") || react.includes("Afternoon") || react.includes("evening") || react.includes("eat") || react.includes("Eat") || react.includes("night") || react.includes("nyt") || react.includes("Night") || react.includes("Nyt")) {
-      var heart = {
-        body: ""
-      }
-      api.sendMessage(heart, threadID, messageID);
+module.exports.handleEvent = function({ api, event, client, __GLOBAL }) {
+	var { threadID, messageID } = event;
+	let react = event.body.toLowerCase()
+	if (event.body.indexOf("assalamu alaikum")==0 || event.body.indexOf("Nazrul")==0 || event.body.indexOf("nazrul")==0 || event.body.indexOf("Assalamu alaikum")==0 || event.body.indexOf("vai")==0 || event.body.indexOf("মা")==0 || event.body.indexOf("mother")==0 || event.body.indexOf("Mother")==0 || event.body.indexOf("sumi")==0 || event.body.indexOf("Sumi")==0 || event.body.indexOf("আসসালামু আলাইকুম")==0 || event.body.indexOf("ওয়ালাইকুম আসসালাম")==0 || event.body.indexOf("Vai")==0 || event.body.indexOf("Bon")==0 || event.body.indexOf("বোন")==0 || event.body.indexOf("bon")==0 || event.body.indexOf("Bot")==0 || event.body.indexOf("bot")==0 || event.body.indexOf("sona")==0 || event.body.indexOf("kolija")==0 || event.body.indexOf("নামাজ")==0 || event.body.indexOf("আল্লাহ")==0 || event.body.indexOf("রাসূল")==0 || event.body.indexOf("নবী")==0 || event.body.indexOf("love")==0 || event.body.indexOf("namaj")==0 || event.body.indexOf("baby")==0 || event.body.indexOf("bby")==0 || event.body.indexOf("babe")==0 || event.body.indexOf("bby")==0 || event.body.indexOf("bebe")==0 || event.body.indexOf("আল্লাহ হাফেজ")==0 || event.body.indexOf("আই লাব ইউ ")==0 || event.body.indexOf("namaje jabo")==0 || event.body.indexOf("Namaje jabo")==0 || event.body.indexOf("Roja")==0 || event.body.indexOf("roja")==0 || event.body.indexOf("Valo")==0 || event.body.indexOf("kaj kori")==0 ||event.body.indexOf("Kaj kori")==0 || event.body.indexOf("কাজে আছি")==0 || event.body.indexOf("কাজ করি")==0 || event.body.indexOf("Suye aci")==0 || event.body.indexOf("suye aci")==0 || event.body.indexOf("Good")==0 || event.body.indexOf("good")==0 || event.body.indexOf("Bangladesh")==0 || event.body.indexOf("অফিসে")==0 || event.body.indexOf("father")==0 || event.body.indexOf("Father")==0 || event.body.indexOf("Baba")==0 || event.body.indexOf("morning")==0 || event.body.indexOf("Eve")==0 || event.body.indexOf("eve")==0 || event.body.indexOf("wlc")==0 || event.body.indexOf("ওয়েলকাম")==0 || event.body.indexOf("tnx")==0 || event.body.indexOf("tanks ")==0 || event.body.indexOf("❤")==0 && !bot.includes(event.senderID))  {
+		var msg = {
+				body: ""
+			}
+			api.sendMessage(msg, threadID, messageID);
     api.setMessageReaction("❤", event.messageID, (err) => {}, true)
-            };
-  if(react.includes("wow") || react.includes("robot")) {
-      var heart = {
-        body: ""
-      }
-      api.sendMessage(heart, threadID, messageID);
-    api.setMessageReaction("😮", event.messageID, (err) => {}, true)
-            }
-        }
-  module.exports.run = function({ api, event, client, __GLOBAL }) {
+		};
+	if (event.body.indexOf("love")==0 || event.body.indexOf("shet")==0 || event.body.indexOf("kantot")==0 || event.body.indexOf("Kantot")==0 || event.body.indexOf("kantutan")==0 || event.body.indexOf("Love")==0 || event.body.indexOf("Kantutan")==0 || event.body.indexOf("kantotan")==0 || event.body.indexOf("kantotan")==0 || event.body.indexOf("iyutan")==0 || event.body.indexOf("Iyutan")==0 || event.body.indexOf("iyutan")==0 || event.body.indexOf("iyotan")==0 || event.body.indexOf("Iyotan")==0 || event.body.indexOf("bold")==0 || event.body.indexOf("Bold")==0 || event.body.indexOf("Porn")==0 || event.body.indexOf("porn")==0 || event.body.indexOf("pekpek")==0 || event.body.indexOf("Pekpek")==0 || event.body.indexOf("Love")==0 || event.body.indexOf("i love")==0 || event.body.indexOf("i Love")==0 || event.body.indexOf("ilove")==0 || event.body.indexOf("I love")==0 || event.body.indexOf("I Love")==0 || event.body.indexOf("Love")==0 || event.body.indexOf("ilab")==0 || event.body.indexOf("lalabs")==0 || event.body.indexOf("Lalabs")==0 || event.body.indexOf("😙")==0 || event.body.indexOf("😘")==0 || event.body.indexOf("😗")==0 || event.body.indexOf("😙")==0 || event.body.indexOf("😋")==0 || event.body.indexOf("mahal")==0 || event.body.indexOf("Mahal")==0 || event.body.indexOf("fuck")==0 || event.body.indexOf("ugh")==0 ||event.body.indexOf("😍")==0 || event.body.indexOf("iniyot")==0 || event.body.indexOf("Iniyot")==0 || event.body.indexOf("eut")==0 || event.body.indexOf("Eut")==0 || event.body.indexOf("eutan")==0 || event.body.indexOf("Eutan")==0 || event.body.indexOf("eutan")==0 || event.body.indexOf("pepe")==0 || event.body.indexOf("Pepe")==0 || event.body.indexOf("Pekpek")==0 || event.body.indexOf("Jakol")==0 || event.body.indexOf("salsal")==0 || event.body.indexOf("🥰")==0 || event.body.indexOf("jakul")==0 || event.body.indexOf("Jakol")==0 || event.body.indexOf("fingerin")==0 || event.body.indexOf("Fingerin")==0 || event.body.indexOf("/")==0 || event.body.indexOf("সোনা")==0 && !bot.includes(event.senderID))  {
+		var msg = {
+				body: ""
+			}
+			api.sendMessage(msg, threadID, messageID);
+    api.setMessageReaction("😘", event.messageID, (err) => {}, true)
+		};
+	if (event.body.indexOf("sad")==0 || event.body.indexOf("out")==0 || event.body.indexOf("Out")==0 || event.body.indexOf("Dibo na")==0 || event.body.indexOf("দিবো না")==0 || event.body.indexOf("দেয়না")==0 || event.body.indexOf("দেয়নি")==0 || event.body.indexOf("vule geco")==0 || event.body.indexOf("ভুলে গেছো")==0 || event.body.indexOf("ভুলে গেছে")==0 || event.body.indexOf("Vule gece")==0 || event.body.indexOf("vule gece")==0 || event.body.indexOf("মারবো")==0 || event.body.indexOf("পাগলি")==0 || event.body.indexOf("Pagli")==0 || event.body.indexOf("pagli")==0 || event.body.indexOf("Pagol")==0 || event.body.indexOf("pagol")==0 || event.body.indexOf("পাগল")==0 || event.body.indexOf("আজাইরা")==0 || event.body.indexOf("আজব")==0 || event.body.indexOf("Valo nai")==0 || event.body.indexOf("Valo na")==0 || event.body.indexOf("valo na")==0 || event.body.indexOf("ভালো না")==0 || event.body.indexOf("ভালো নেই")==0 || event.body.indexOf("valo nai")==0 || event.body.indexOf("akhon na")==0 || event.body.indexOf("Akhon na")==0 || event.body.indexOf("এখন না")==0 || event.body.indexOf("আজ আসবে না")==0 || event.body.indexOf("বালের কথা")==0 || event.body.indexOf("সর তুই")==0 || event.body.indexOf("তুই সর")==0 || event.body.indexOf("Gorom")==0 || event.body.indexOf("gorom")==0 || event.body.indexOf("গরম লাগছে")==0 || event.body.indexOf("ifeel")==0 || event.body.indexOf("Parci na")==0 ||event.body.indexOf("parci na")==0 || event.body.indexOf("পারছি না")==0 || event.body.indexOf("দেরি হবে")==0 || event.body.indexOf("Khelbo na")==0 || event.body.indexOf("khelbo na")==0 || event.body.indexOf("😥")==0 || event.body.indexOf("😭")==0 || event.body.indexOf("মারবে")==0 || event.body.indexOf("marbe")==0 || event.body.indexOf("morbo")==0 || event.body.indexOf("Morbo")==0 || event.body.indexOf("মরবো")==0 || event.body.indexOf("মৃত্যু")==0 || event.body.indexOf("morce")==0 || event.body.indexOf("মরছে")==0 || event.body.indexOf("Morce")==0 || event.body.indexOf("Mara gece")==0 || event.body.indexOf("mara gece")==0 || event.body.indexOf("Asbe na")==0 || event.body.indexOf("asbe na")==0 || event.body.indexOf("আসবে না")==0 || event.body.indexOf("নাই")==0 || event.body.indexOf("ভুল হইছে")==0 || event.body.indexOf("হচ্চে না")==0 || event.body.indexOf("খুজে পাই না")==0 || event.body.indexOf("মিস")==0 || event.body.indexOf("Miss")==0 || event.body.indexOf("miss")==0 && !bot.includes(event.senderID))  {
+		var msg = {
+				body: ""
+			}
+			api.sendMessage(msg, threadID, messageID);
+    api.setMessageReaction("😢", event.messageID, (err) => {}, true)
+		};
+	if (event.body.indexOf("bobo")==0 || event.body.indexOf("Bobo")==0 || event.body.indexOf("gago")==0 || event.body.indexOf("Gago")==0 || event.body.indexOf("suntukan")==0 || event.body.indexOf("kantutin")==0 || event.body.indexOf("hayop")==0 || event.body.indexOf("kantutin")==0 || event.body.indexOf("Hayop")==0 || event.body.indexOf("hindot")==0 || event.body.indexOf("Hayup")==0 || event.body.indexOf("hayup")==0 || event.body.indexOf("tangina")==0 || event.body.indexOf("Tangina")==0 || event.body.indexOf("tang ina")==0 || event.body.indexOf("Tang ina")==0 || event.body.indexOf("bwesit")==0 || event.body.indexOf("Bwesit")==0 || event.body.indexOf("Piste")==0 || event.body.indexOf("piste")==0 || event.body.indexOf("argh")==0 || event.body.indexOf("pota")==0 || event.body.indexOf("Pota")==0 || event.body.indexOf("puta")==0 || event.body.indexOf("fuckyou")==0 || event.body.indexOf("pakyu")==0 || event.body.indexOf("pakyo")==0 || event.body.indexOf("may bold")==0 || event.body.indexOf("kingina")==0 || event.body.indexOf("Kingina")==0 || event.body.indexOf("King ina")==0 || event.body.indexOf("HAHAHA")==0 || event.body.indexOf("May bold")==0 || event.body.indexOf("baliw")==0 || event.body.indexOf("bubu")==0 || event.body.indexOf("mabaho")==0 || event.body.indexOf("Mabaho")==0 || event.body.indexOf("manyakis")==0 || event.body.indexOf("manyakol")==0 ||event.body.indexOf("ambobo")==0 || event.body.indexOf("walang utak")==0 || event.body.indexOf("Walang utak")==0 || event.body.indexOf("send bold")==0 || event.body.indexOf("Send bold")==0 || event.body.indexOf("😆")==0 || event.body.indexOf("😂")==0 || event.body.indexOf("🤣")==0 || event.body.indexOf("bts biot")==0 || event.body.indexOf("bts")==0 || event.body.indexOf("BTS")==0 || event.body.indexOf("Bts")==0 || event.body.indexOf("bold ni")==0 || event.body.indexOf("Bold ni")==0 || event.body.indexOf("may bold si")==0 || event.body.indexOf("May bold si")==0 || event.body.indexOf("deputa")==0 || event.body.indexOf("Deputa")==0 || event.body.indexOf("hahaha")==0 || event.body.indexOf("amp")==0 || event.body.indexOf("Amp")==0 || event.body.indexOf("tanga")==0 || event.body.indexOf("Robot")==0 || event.body.indexOf("robot")==0 || event.body.indexOf("Bot")==0 || event.body.indexOf("bot")==0 || event.body.indexOf("বট")==0 || event.body.indexOf("Hahaha")==0 && !bot.includes(event.senderID))  {
+		var msg = {
+				body: ""
+			}
+			api.sendMessage(msg, threadID, messageID);
+    api.setMessageReaction("🥰", event.messageID, (err) => {}, true)
+		}
+	}
+	module.exports.run = function({ api, event, client, __GLOBAL }) {
 
   }
-

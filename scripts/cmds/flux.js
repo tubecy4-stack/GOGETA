@@ -1,99 +1,45 @@
 const axios = require("axios");
-const fs = require("fs-extra");
 
-module.exports = {
-  config: {
-    name: "flux",
-    aliases: [],
-    version: "5.0",
-    author: "nexo_here",
-    countDown: 5,
-    role: 0,
-    shortDescription: "Generate ultra-realistic AI images with advanced style options",
-    longDescription: "Use Flux API to generate premium, hyper-realistic AI images with customizable styles and options",
-    category: "AI-IMAGE",
-    guide: {
-      en: `{pn} <prompt> | [style]\n\n📌 Example:\n{pn} a lion in desert | realistic\n{pn} warrior girl with sword | anime\n{pn} cybernetic dragon flying | cyberpunk`
-    }
-  },
+module.exports.config = {
+ name: "flux",
+ version: "2.0",
+ hasPermssion: 0,
+ credits: "Dipto",
+ description: "Flux Image Generator",
+ commandCategory: "𝗜𝗠𝗔𝗚𝗘 𝗚𝗘𝗡𝗘𝗥𝗔𝗧𝗢𝗥",
+ usage: "{pn} [prompt] --ratio 1024x1024\n{pn} [prompt]",
+ countDown: 15,
+};
 
-  langs: {
-    en: {
-      noPrompt: `❗ Please provide a prompt.\n\n📌 Example:\n• flux a lion in jungle | realistic\n• flux dragon on rooftop | fantasy`,
-      generating: "🖼️ Generating your premium AI image...",
-      failed: "❌ Failed to generate image. Please try again later.",
-      invalidStyle: "⚠️ Unknown style provided! Using your prompt as is."
-    }
-  },
+module.exports.run = async ({ event, args, api }) => {
+ const dipto = "https://www.noobs-api.rf.gd/dipto";
 
-  onStart: async function ({ message, args, getLang }) {
-    if (!args[0]) return message.reply(getLang("noPrompt"));
+ try {
+ const prompt = args.join(" ");
+ const [prompt2, ratio = "1:1"] = prompt.includes("--ratio")
+ ? prompt.split("--ratio").map(s => s.trim())
+ : [prompt, "1:1"];
 
-    const input = args.join(" ").split("|");
-    const rawPrompt = input[0].trim();
-    let style = input[1]?.trim().toLowerCase() || "";
+ const startTime = Date.now();
 
-    // অনেক উন্নত স্টাইল ম্যাপ (AI image gen এর জন্য জনপ্রিয় ট্যাগসহ)
-    const styleMap = {
-      realistic: "photorealistic, ultra-detailed, 8K UHD, DSLR quality, natural lighting, depth of field",
-      anime: "anime style, vibrant colors, sharp lines, cel shading, highly detailed character art",
-      fantasy: "fantasy art, epic background, magical aura, dramatic lighting, mythical creatures",
-      cyberpunk: "cyberpunk, neon lights, futuristic cityscape, dark atmosphere, high tech details",
-      cartoon: "cartoon style, bold outlines, bright colors, 2D animation look, fun and playful",
-      "digital art": "digital painting, smooth brush strokes, vivid colors, high detail",
-      "oil painting": "oil painting style, textured brush strokes, classical art, warm tones",
-      "photography": "professional photography, natural light, sharp focus, realistic",
-      "low poly": "low poly art style, geometric shapes, minimalistic, vibrant colors",
-      "pixel art": "pixel art style, retro gaming, 8-bit colors, sharp edges",
-      "surrealism": "surrealistic art, dreamlike scenes, abstract, vivid imagination",
-      "vaporwave": "vaporwave style, pastel colors, retro-futuristic, glitch art",
-      "concept art": "concept art, detailed environment, mood lighting, cinematic",
-      "portrait": "portrait photography, close-up, high detail, studio lighting",
-      "macro": "macro photography, extreme close-up, detailed textures, shallow depth of field"
-    };
+ const waitMessage = await api.sendMessage("Generating image, please wait... 😘", event.threadID);
+ api.setMessageReaction("⌛", event.messageID, () => {}, true);
 
-    // যদি style থাকে, সেটি styleMap থেকে নিবো, অন্যথায় rawPrompt ব্যবহার করবো
-    let finalPrompt;
-    if (style) {
-      if (styleMap[style]) {
-        finalPrompt = `${rawPrompt}, ${styleMap[style]}`;
-      } else {
-        // Unknown style দিলে শুধু rawPrompt নিবে এবং ইউজারকে জানাবে
-        finalPrompt = rawPrompt;
-        message.reply(getLang("invalidStyle"));
-      }
-    } else {
-      finalPrompt = rawPrompt;
-    }
+ const apiurl = `${dipto}/flux?prompt=${encodeURIComponent(prompt2)}&ratio=${encodeURIComponent(ratio)}`;
+ const response = await axios.get(apiurl, { responseType: "stream" });
 
-    message.reply(getLang("generating"));
+ const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 
-    try {
-      const res = await axios.get(`https://betadash-api-swordslush-production.up.railway.app/flux?prompt=${encodeURIComponent(finalPrompt)}`);
-      const imageUrl = res?.data?.data?.imageUrl;
+ api.setMessageReaction("✅", event.messageID, () => {}, true);
+ api.unsendMessage(waitMessage.messageID);
 
-      if (!imageUrl) return message.reply(getLang("failed"));
+ api.sendMessage({
+ body: `Here's your image (Generated in ${timeTaken} seconds)`,
+ attachment: response.data,
+ }, event.threadID, event.messageID);
 
-      const imgStream = await axios.get(imageUrl, { responseType: "stream" });
-      const filePath = `${__dirname}/cache/flux_${Date.now()}.jpg`;
-      const writer = fs.createWriteStream(filePath);
-
-      imgStream.data.pipe(writer);
-
-      writer.on("finish", () => {
-        message.reply({
-          body: `🧠 Prompt: ${rawPrompt}${style ? `\n🎨 Style: ${style}` : ""}`,
-          attachment: fs.createReadStream(filePath)
-        }, () => fs.unlinkSync(filePath));
-      });
-
-      writer.on("error", () => {
-        message.reply(getLang("failed"));
-      });
-
-    } catch (err) {
-      console.error(err.message);
-      return message.reply(getLang("failed"));
-    }
-  }
+ } catch (e) {
+ console.error(e);
+ api.sendMessage("Error: " + e.message, event.threadID, event.messageID);
+ }
 };

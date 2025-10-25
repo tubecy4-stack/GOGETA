@@ -1,66 +1,39 @@
-const axios = require("axios");
-const fs = require("fs-extra");
-const path = require("path");
-
-module.exports = {
- config: {
+module.exports.config = {
  name: "pic",
- aliases: ["randomimg"],
- version: "2.3",
- author: "Chitron Bhattacharjee",
- countDown: 15,
- role: 0,
- shortDescription: "Anime-style image search — no API key!",
- longDescription: "Fetch images via Unsplash (featured) with fallback to Lorem Picsum",
- category: "download",
- guide: { en: "{pn} <query> -<count>\nExample: `pin manga girl -3`" }
- },
-
- onStart: async function ({ api, event, args }) {
- const input = args.join(" ");
- const [queryPart, countPart] = input.split("-");
- const query = queryPart?.trim();
- const count = Math.min(Math.max(parseInt(countPart?.trim() || "4"), 1), 6);
-
- if (!query || isNaN(count)) {
- return api.sendMessage(
- "❌ Usage: `pin <query> -<count>`\nExample: `pic -3`",
- event.threadID,
- event.messageID
- );
+ version: "1.0.0",
+ hasPermssion: 0,
+ credits: "Shaon Ahmed",
+ description: "Image search",
+ commandCategory: "Search",
+ usages: "[Text]",
+ cooldowns: 0,
+};
+module.exports.run = async function({ api, event, args }) {
+ const axios = require("axios");
+ const fs = require("fs-extra");
+ const request = require("request");
+ const keySearch = args.join(" ");
+ const apis = await axios.get('https://raw.githubusercontent.com/shaonproject/Shaon/main/api.json')
+ const Shaon = apis.data.noobs
+ 
+ if(keySearch.includes("-") == false) return api.sendMessage('Please enter in the format, example: pic islamic-10 (it depends on you how many images you want to appear in the result) create by 𝐒𝐡𝐚𝐡𝐚𝐝𝐚𝐭 𝐈𝐬𝐥𝐚𝐦𝐢𝐜 𝐁𝐨𝐭', event.threadID, event.messageID)
+ const keySearchs = keySearch.substr(0, keySearch.indexOf('-'))
+ const numberSearch = keySearch.split("-").pop() || 6
+ const res = await axios.get(`${Shaon}/pinterest?search=${encodeURIComponent(keySearchs)}`);
+ const data = res.data.data;
+ var num = 0;
+ var imgData = [];
+ for (var i = 0; i < parseInt(numberSearch); i++) {
+ let path = __dirname + `/cache/${num+=1}.jpg`;
+ let getDown = (await axios.get(`${data[i]}`, { responseType: 'arraybuffer' })).data;
+ fs.writeFileSync(path, Buffer.from(getDown, 'utf-8'));
+ imgData.push(fs.createReadStream(__dirname + `/cache/${num}.jpg`));
  }
-
- const wait = await api.sendMessage("🔍 Fetching cute images…", event.threadID);
- const attachments = [];
- const today = new Date().toISOString().split("T")[0];
-
- for (let i = 0; i < count; i++) {
- let url = `https://source.unsplash.com/featured/800x600?${encodeURIComponent(query)}`;
-
- try {
- const imgRes = await axios.get(url, { responseType: "arraybuffer" });
- url = imgRes.request.res.responseUrl || url;
- const filePath = path.join(__dirname, "cache", `pin_${Date.now()}_${i}.jpg`);
- await fs.outputFile(filePath, imgRes.data);
- attachments.push({ stream: fs.createReadStream(filePath), url });
- } catch {
- // Fallback to Picsum
- url = `https://picsum.photos/800/600?random=${Date.now()}-${i}`;
- const imgRes2 = await axios.get(url, { responseType: "arraybuffer" });
- const filePath = path.join(__dirname, "cache", `pin_fallback_${Date.now()}_${i}.jpg`);
- await fs.outputFile(filePath, imgRes2.data);
- attachments.push({ stream: fs.createReadStream(filePath), url });
- }
- }
-
- await api.unsendMessage(wait.messageID);
- for (const a of attachments) {
- const caption =
- `💖 𝓔𝓷𝓭𝓵𝒾𝓼𝓼𝓱 Image 🖼️\n` +
- `📅 Date: ${today}\n` +
- `🔍 Query: “${query}”\n` +
- `🔗 Source: ${a.url}`;
- await api.sendMessage({ body: caption, attachment: a.stream }, event.threadID);
- }
+ api.sendMessage({
+ attachment: imgData,
+ body: numberSearch + ' Searching 🔎 results for you. Your keyword: '+ keySearchs
+ }, event.threadID, event.messageID)
+ for (let ii = 1; ii < parseInt(numberSearch); ii++) {
+ fs.unlinkSync(__dirname + `/cache/${ii}.jpg`)
  }
 };

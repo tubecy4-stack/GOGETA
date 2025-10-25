@@ -1,33 +1,53 @@
-module.exports = {
- config: {
- name: "profile",
- aliases: ["pfp", "pp"],
- version: "1.1",
- author: "Chitron Bhattacharjee",
- countDown: 5,
- role: 0,
- description: "PROFILE image",
- category: "image",
- guide: { en: "{pn} @tag or userID or reply to a message or provide a Facebook URL" }
- },
- onStart: async function ({ event, message, usersData, args }) {
- const getAvatarUrl = async (uid) => await usersData.getAvatarUrl(uid);
- const uid = Object.keys(event.mentions)[0] || args[0] || event.senderID;
- let avt;
-
- try {
- if (event.type === "message_reply") {
- avt = await getAvatarUrl(event.messageReply.senderID);
- } else if (args.join(" ").includes("facebook.com")) {
- const match = args.join(" ").match(/(\d+)/);
- if (match) avt = await getAvatarUrl(match[0]);
- else throw new Error("Invalid Facebook URL.");
- } else {
- avt = await getAvatarUrl(uid);
- }
- message.reply({ body: "", attachment: await global.utils.getStreamFromURL(avt) });
- } catch (error) {
- message.reply(`⚠️ Error: ${error.message}`);
- }
- }
+module.exports.config = {
+  name: "pp",
+  version: "1.0.0",
+  hasPermssion: 0,
+  credits: "NAZRUL",
+  description: "Lấy ID người dùng.",
+  commandCategory: "Công cụ",
+  cooldowns: 0
 };
+
+module.exports.run = async function({ event, api, args, client, Currencies, Users, utils, __GLOBAL, reminder }) {
+const fs = global.nodemodule["fs-extra"];
+    const request = global.nodemodule["request"];
+    const axios = global.nodemodule['axios']; 
+    if(event.type == "message_reply") { 
+      let name = await Users.getNameUser(event.messageReply.senderID) 
+	uid = event.messageReply.senderID
+	var callback = () =>   api.sendMessage({body:`==profile==━`, attachment: fs.createReadStream(__dirname + "/cache/1.png")}, event.threadID,
+        () => fs.unlinkSync(__dirname + "/cache/1.png"),event.messageID); 
+    return request(encodeURI(`https://graph.facebook.com/${uid}/picture?height=1500&width=1500&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`)).pipe(fs.createWriteStream(__dirname+'/cache/1.png')).on('close',
+        () => callback()); 
+    }
+    if (!args[0]) {
+      var uid = event.senderID;
+      
+        var callback = () =>  api.sendMessage({body:`==profile==━`, attachment: fs.createReadStream(__dirname + "/cache/1.png")}, event.threadID,
+        () => fs.unlinkSync(__dirname + "/cache/1.png"),event.messageID); 
+    return request(encodeURI(`https://graph.facebook.com/${event.senderID}/picture?height=1500&width=1500&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`)).pipe(fs.createWriteStream(__dirname+'/cache/1.png')).on('close',
+        () => callback()); 
+    }
+    else {
+	if (args[0].indexOf(".com/")!==-1) {
+    const res_ID = await api.getUID(args[0]);
+   var name = data.name
+var data = await api.getUserInfoV2(res_ID);
+    var username = data.username
+    var link = data.link
+    var callback = () => api.sendMessage({body:`=== [ profile==]`, attachment: fs.createReadStream(__dirname + "/cache/1.png")}, event.threadID,
+        () => fs.unlinkSync(__dirname + "/cache/1.png"),event.messageID); 
+    return request(encodeURI(`https://graph.facebook.com/${res_ID}/picture?height=1500&width=1500&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`)).pipe(fs.createWriteStream(__dirname+'/cache/1.png')).on('close',
+        () => callback()); }
+	else {
+		if (args.join().indexOf('@') !== -1) 
+      var uid = Object.keys(event.mentions) 
+      var callback = () => 
+api.sendMessage({body:`=== profile===`, attachment: fs.createReadStream(__dirname + "/cache/1.png")}, event.threadID,
+        () => fs.unlinkSync(__dirname + "/cache/1.png"),event.messageID); 
+    return request(encodeURI(`https://graph.facebook.com/${uid}/picture?height=1500&width=1500&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`)).pipe(fs.createWriteStream(__dirname+'/cache/1.png')).on('close',
+        () => callback()); 
+               
+	}
+}
+}
