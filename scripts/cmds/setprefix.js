@@ -2,7 +2,7 @@ module.exports.config = {
 	name: "setprefix",
 	version: "1.0.1",
 	hasPermssion: 2,
-	credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
+	credits: "𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
 	description: "Reset group prefix",
 	commandCategory: "Group",
 	usages: "[prefix/reset]",

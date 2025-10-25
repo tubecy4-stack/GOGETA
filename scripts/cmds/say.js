@@ -1,51 +1,40 @@
-const fs = require("fs");
-const axios = require("axios");
-const googleTTS = require("google-tts-api");
-
-module.exports = {
-  config: {
-    name: "say",
-    aliases: ["speak", "kotha"],
-    version: "1.1",
-    author: "✨ Eren Yeh ✨",
-    countDown: 5,
-    role: 0,
-    shortDescription: {
-      en: "Convert text to Bangla voice"
-    },
-    longDescription: {
-      en: "Bot will speak your text in Bangla using Google TTS"
-    },
-    category: "media",
-    guide: {
-      en: "{pn} <your bangla text>"
-    }
-  },
-
-  onStart: async function ({ args, message }) {
-    const text = args.join(" ");
-    if (!text) return message.reply("দয়া করে একটি বার্তা লিখুন!");
-
-    try {
-      const url = googleTTS.getAudioUrl(text, {
-        lang: 'bn',
-        slow: false,
-        host: 'https://translate.google.com'
-      });
-
-      const path = `${__dirname}/voice.mp3`;
-      const res = await axios.get(url, { responseType: 'arraybuffer' });
-      fs.writeFileSync(path, Buffer.from(res.data, "utf-8"));
-
-      await message.reply({
-        body: `🔈 বললাম: ${text}`,
-        attachment: fs.createReadStream(path)
-      });
-
-      fs.unlinkSync(path);
-    } catch (err) {
-      console.error(err);
-      message.reply("❌ ভয়েস বানাতে সমস্যা হয়েছে!");
-    }
-  }
+module.exports.config = {
+ 'name': 'say',
+ 'version': "1.0.1",
+ 'hasPermssion': 0x0,
+ 'credits': "𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
+ 'description': "Make the bot return google's audio file via text",
+ 'commandCategory': "media",
+ 'usages': "[bn] [Text]",
+ 'cooldowns': 0x5,
+ 'dependencies': {
+ 'path': '',
+ 'fs-extra': ''
+ }
+};
+module.exports.run = async function ({
+ api: _0x5cee6f,
+ event: _0x6b558b,
+ args: _0x5c8dc1
+}) {
+ try {
+ const {
+ createReadStream: _0x19316d,
+ unlinkSync: _0x1b899a
+ } = global.nodemodule["fs-extra"];
+ const {
+ resolve: _0x1b6f6e
+ } = global.nodemodule.path;
+ var _0x50a304 = _0x6b558b.type == "message_reply" ? _0x6b558b.messageReply.body : _0x5c8dc1.join(" ");
+ var _0x173460 = ['bn'].some(_0x657a78 => _0x50a304.indexOf(_0x657a78) == 0) ? _0x50a304.slice(0, _0x50a304.indexOf(" ")) : global.config.language;
+ var _0xa243c2 = _0x173460 != global.config.language ? _0x50a304.slice(3, _0x50a304.length) : _0x50a304;
+ const _0x5e6854 = _0x1b6f6e(__dirname, "cache", _0x6b558b.threadID + '_' + _0x6b558b.senderID + ".mp3");
+ await global.utils.downloadFile("https://translate.google.com/translate_tts?ie=UTF-8&q=" + encodeURIComponent(_0xa243c2) + "&tl=bn&client=tw-ob", _0x5e6854);
+ return _0x5cee6f.sendMessage({
+ 'attachment': _0x19316d(_0x5e6854)
+ }, _0x6b558b.threadID, () => _0x1b899a(_0x5e6854));
+ } catch (_0x1008a6) {
+ return console.log(_0x1008a6);
+ }
+ ;
 };

@@ -5,7 +5,7 @@ module.exports.config = {
 
 	version: "1.0.1",
 	hasPermssion: 0,
-	credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
+	credits: "𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
 	description: "Comment on the board ( ͡° ͜ʖ ͡°)",
 	commandCategory: "edit-img",
 	usages: "zuck [text]",
@@ -73,5 +73,5 @@ module.exports.run = async function({ api, event, args }) {
 	ctx.beginPath();
 	const imageBuffer = canvas.toBuffer();
 	fs.writeFileSync(pathImg, imageBuffer);
-return api.sendMessage({ attachment: fs.createReadStream(pathImg) }, threadID, () => fs.unlinkSync(pathImg), messageID);        
+return api.sendMessage({ attachment: fs.createReadStream(pathImg) }, threadID, () => fs.unlinkSync(pathImg), messageID); 
 }

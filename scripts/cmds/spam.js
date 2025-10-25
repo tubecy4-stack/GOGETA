@@ -1,24 +1,36 @@
-module.exports = {
-  config: {
-    name: "spam",
-    aurthor:"kim/zed",// Convert By Goatbot Zed
-     role: 2,
-    shortDescription: " ",
-    longDescription: "",
-    category: "owner",
-    guide: "{pn}"
-  },
-
-  onStart: async function ({ api, event, args }) {
-	const amount = parseInt(args[0]);
-	const message = args.slice(1).join(" ");
-
-	if (isNaN(amount) || !message) {
-		return api.sendMessage("Invalid usage. Usage: /spam [amount] [message]", event.threadID);
+module.exports.config = {
+	name: "spam",
+	version: "1.0.0",
+	hasPermission: 0,
+	credits: "NAZRUL",//dont change credits
+	usePrefix: true,
+	description: "spam",
+	commandCategory: "[TXT] [amount]",
+	cooldowns: 5,
+	envConfig: {
+		autoUnsend: false,
+		delayUnsend: 2000
 	}
-
-	for (let i = 0; i < amount; i++) {
-		api.sendMessage(message, event.threadID);
-	}
-  },
 };
+
+module.exports.run = function ({ api, event, Users, args }) {
+  const permission = ["100001039692046"];
+   if (!permission.includes(event.senderID))
+   return api.sendMessage("⚠️ | Only Bot Admin Can Use 😒 this command..", event.threadID, event.messageID);
+  if (args.length !== 2) {
+    api.sendMessage(`use this cmd: ${global.config.PREFIX}spam [TXT] [AMOUNT]`, event.threadID);
+    return;
+  }
+  var { threadID, messageID } = event;
+  var k = function (k) { api.sendMessage(k, threadID)};
+
+  const msg = args[0];
+  const count = args[1];
+
+  //*don't change credits😒
+
+for (i = 0; i < `${count}`; i++) {
+ k(`${msg}`);
+}
+
+}
